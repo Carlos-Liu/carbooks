@@ -25,6 +25,21 @@ namespace CarBooks.Database.Ef.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("BookCategories", b =>
+                {
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("BookId", "CategoryId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("BookCategories", (string)null);
+                });
+
             modelBuilder.Entity("CarBooks.Domain.Catalog.Book", b =>
                 {
                     b.Property<Guid>("Id")
@@ -33,11 +48,8 @@ namespace CarBooks.Database.Ef.Migrations
 
                     b.Property<string>("Author")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uuid");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<byte[]>("CoverImage")
                         .HasColumnType("bytea");
@@ -56,12 +68,12 @@ namespace CarBooks.Database.Ef.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId", "DisplayOrder");
+                    b.HasIndex("DisplayOrder");
 
                     b.ToTable("Books", (string)null);
                 });
@@ -77,36 +89,34 @@ namespace CarBooks.Database.Ef.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Slug")
-                        .IsUnique();
 
                     b.ToTable("Categories", (string)null);
                 });
 
-            modelBuilder.Entity("CarBooks.Domain.Catalog.Book", b =>
+            modelBuilder.Entity("BookCategories", b =>
                 {
-                    b.HasOne("CarBooks.Domain.Catalog.Category", "Category")
-                        .WithMany("Books")
-                        .HasForeignKey("CategoryId")
+                    b.HasOne("CarBooks.Domain.Catalog.Book", null)
+                        .WithMany()
+                        .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Category");
+                    b.HasOne("CarBooks.Domain.Catalog.Category", null)
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
-            modelBuilder.Entity("CarBooks.Domain.Catalog.Category", b =>
+            modelBuilder.Entity("CarBooks.Domain.Catalog.Book", b =>
                 {
-                    b.Navigation("Books");
+                    b.HasMany("CarBooks.Domain.Catalog.Category", "Categories")
+                        .WithMany()
+                        .UsingEntity("BookCategories");
                 });
 #pragma warning restore 612, 618
         }

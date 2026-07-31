@@ -17,7 +17,7 @@ internal sealed class EfBookRepository : IBookRepository
     public async Task<IReadOnlyList<Book>> ListByCategoryAsync(Guid categoryId, CancellationToken cancellationToken) =>
         await dbContext.Books
             .AsNoTracking()
-            .Where(book => book.CategoryId == categoryId)
+            .Where(book => book.Categories.Any(category => category.Id == categoryId))
             .OrderBy(book => book.DisplayOrder)
             .ThenBy(book => book.Name)
             .ToListAsync(cancellationToken);
@@ -25,5 +25,6 @@ internal sealed class EfBookRepository : IBookRepository
     public Task<Book?> FindAsync(Guid bookId, CancellationToken cancellationToken) =>
         dbContext.Books
             .AsNoTracking()
+            .Include(book => book.Categories)
             .FirstOrDefaultAsync(book => book.Id == bookId, cancellationToken);
 }

@@ -4,8 +4,8 @@ using CarBooks.Domain.Shared.Errors;
 namespace CarBooks.Domain.Catalog;
 
 /// <summary>
-/// Domain service coordinating the category and book aggregates. It owns the rules that span both
-/// of them, keeping the application layer free of business decisions.
+/// Domain service coordinating independent category and book aggregates. It owns the rules that
+/// span both of them, keeping the application layer free of business decisions.
 /// </summary>
 public sealed class CatalogManager
 {
@@ -25,15 +25,13 @@ public sealed class CatalogManager
         categoryRepository.CountBooksByCategoryAsync(cancellationToken);
 
     /// <summary>
-    /// Resolves a category by its slug together with its books.
+    /// Resolves a category by its id together with its books.
     /// </summary>
-    /// <exception cref="EntityNotFoundException">No category carries the requested slug.</exception>
-    public async Task<CategoryBooks> GetCategoryBooksAsync(string slug, CancellationToken cancellationToken)
+    /// <exception cref="EntityNotFoundException">No category carries the requested id.</exception>
+    public async Task<CategoryBooks> GetCategoryBooksAsync(Guid categoryId, CancellationToken cancellationToken)
     {
-        var normalised = Guard.Text(slug, "Category slug", Shared.CatalogConsts.MaxCategorySlugLength).ToLowerInvariant();
-
-        var category = await categoryRepository.FindBySlugAsync(normalised, cancellationToken)
-            ?? throw new EntityNotFoundException(nameof(Category), normalised);
+        var category = await categoryRepository.FindAsync(categoryId, cancellationToken)
+            ?? throw new EntityNotFoundException(nameof(Category), categoryId);
 
         var books = await bookRepository.ListByCategoryAsync(category.Id, cancellationToken);
         return new CategoryBooks(category, books);

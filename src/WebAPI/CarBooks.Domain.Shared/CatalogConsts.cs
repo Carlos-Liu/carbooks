@@ -6,13 +6,11 @@ namespace CarBooks.Domain.Shared;
 /// </summary>
 public static class CatalogConsts
 {
-    public const int MaxCategoryNameLength = 128;
+    public const int MaxCategoryNameLength = 64;
 
-    public const int MaxCategorySlugLength = 128;
+    public const int MaxBookNameLength = 64;
 
-    public const int MaxBookNameLength = 256;
-
-    public const int MaxBookAuthorLength = 256;
+    public const int MaxBookAuthorLength = 64;
 
     public const int MaxCoverUrlLength = 2048;
 

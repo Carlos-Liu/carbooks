@@ -23,16 +23,16 @@ internal sealed class BookAppService : IBookAppService
         this.logger = logger;
     }
 
-    public async Task<CategoryBooksDto> GetBooksByCategorySlugAsync(
-        string categorySlug,
+    public async Task<CategoryBooksDto> GetBooksByCategoryIdAsync(
+        Guid categoryId,
         CancellationToken cancellationToken)
     {
-        var result = await catalogManager.GetCategoryBooksAsync(categorySlug, cancellationToken);
+        var result = await catalogManager.GetCategoryBooksAsync(categoryId, cancellationToken);
 
         logger.LogInformation(
-            "Returning {BookCount} books for category {CategorySlug}.",
+            "Returning {BookCount} books for category {CategoryId}.",
             result.Books.Count,
-            result.Category.Slug);
+            result.Category.Id);
 
         return new CategoryBooksDto(
             result.Category.ToDto(result.Books.Count),

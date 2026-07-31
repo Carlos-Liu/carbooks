@@ -4,7 +4,7 @@ using CarBooks.Domain.Shared.Errors;
 namespace CarBooks.Domain.Catalog;
 
 /// <summary>
-/// A book belonging to exactly one <see cref="Category"/>.
+/// An independent book that may belong to zero or more <see cref="Category"/> entries.
 /// </summary>
 /// <remarks>
 /// A cover can be supplied two ways: <see cref="CoverUrl"/> always points at the publisher artwork,
@@ -13,15 +13,11 @@ namespace CarBooks.Domain.Catalog;
 /// </remarks>
 public sealed class Book : Entity
 {
-    internal Book(Guid id, Guid categoryId, string name, string author, string coverUrl, int displayOrder)
+    private readonly List<Category> categories = [];
+
+    public Book(Guid id, string name, string author, string coverUrl, int displayOrder)
         : base(id)
     {
-        if (categoryId == Guid.Empty)
-        {
-            throw new DomainValidationException("A book must belong to a category.");
-        }
-
-        CategoryId = categoryId;
         Name = Guard.Text(name, nameof(Name), CatalogConsts.MaxBookNameLength);
         Author = Guard.Text(author, nameof(Author), CatalogConsts.MaxBookAuthorLength);
         CoverUrl = Guard.AbsoluteUrl(coverUrl, nameof(CoverUrl), CatalogConsts.MaxCoverUrlLength);
@@ -44,14 +40,30 @@ public sealed class Book : Entity
 
     public string? CoverImageContentType { get; private set; }
 
-    public Guid CategoryId { get; private set; }
-
-    public Category? Category { get; private set; }
-
     public int DisplayOrder { get; private set; }
+
+    public IReadOnlyList<Category> Categories => categories;
 
     public bool HasCoverImage =>
         CoverImage is { Length: > 0 } && !string.IsNullOrWhiteSpace(CoverImageContentType);
+
+    public void AssignToCategory(Category category)
+    {
+        ArgumentNullException.ThrowIfNull(category);
+
+        if (categories.Any(existing => existing.Id == category.Id))
+        {
+            return;
+        }
+
+        categories.Add(category);
+    }
+
+    public void RemoveFromCategory(Category category)
+    {
+        ArgumentNullException.ThrowIfNull(category);
+        categories.RemoveAll(existing => existing.Id == category.Id);
+    }
 
     public void SetCoverImage(byte[] content, string contentType)
     {

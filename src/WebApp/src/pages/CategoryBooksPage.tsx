@@ -23,8 +23,8 @@ const useStyles = makeStyles({
 
 export function CategoryBooksPage() {
   const styles = useStyles();
-  const { slug = '' } = useParams<{ slug: string }>();
-  const { data, isPending, error, refetch } = useQuery(categoryBooksQuery(slug));
+  const { categoryId = '' } = useParams<{ categoryId: string }>();
+  const { data, isPending, error, refetch } = useQuery(categoryBooksQuery(categoryId));
 
   return (
     <section>

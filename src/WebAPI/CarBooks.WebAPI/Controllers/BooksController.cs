@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CarBooks.WebAPI.Controllers;
 
 [ApiController]
-[Route("api/categories/{categorySlug}/books")]
+[Route("api/categories/{categoryId:guid}/books")]
 [Produces("application/json")]
 public sealed class BooksController : ControllerBase
 {
@@ -17,11 +17,11 @@ public sealed class BooksController : ControllerBase
     }
 
     /// <summary>Returns a category together with the books it contains.</summary>
-    /// <param name="categorySlug">URL-safe category identifier, for example <c>category-1</c>.</param>
+    /// <param name="categoryId">Category identifier.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     [HttpGet]
     [ProducesResponseType(typeof(CategoryBooksDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public Task<CategoryBooksDto> GetBooksAsync(string categorySlug, CancellationToken cancellationToken) =>
-        bookAppService.GetBooksByCategorySlugAsync(categorySlug, cancellationToken);
+    public Task<CategoryBooksDto> GetBooksAsync(Guid categoryId, CancellationToken cancellationToken) =>
+        bookAppService.GetBooksByCategoryIdAsync(categoryId, cancellationToken);
 }

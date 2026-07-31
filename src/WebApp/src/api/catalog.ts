@@ -9,9 +9,9 @@ export const categoriesQuery = () =>
     queryFn: ({ signal }) => getJson<Category[]>('/categories', signal),
   });
 
-export const categoryBooksQuery = (slug: string) =>
+export const categoryBooksQuery = (categoryId: string) =>
   queryOptions({
-    queryKey: ['categories', slug, 'books'] as const,
+    queryKey: ['categories', categoryId, 'books'] as const,
     queryFn: ({ signal }) =>
-      getJson<CategoryBooks>(`/categories/${encodeURIComponent(slug)}/books`, signal),
+      getJson<CategoryBooks>(`/categories/${encodeURIComponent(categoryId)}/books`, signal),
   });

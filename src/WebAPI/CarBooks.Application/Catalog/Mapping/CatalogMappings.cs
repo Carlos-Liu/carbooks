@@ -12,7 +12,7 @@ namespace CarBooks.Application.Catalog.Mapping;
 internal static class CatalogMappings
 {
     public static CategoryDto ToDto(this Category category, int bookCount) =>
-        new(category.Id, category.Name, category.Slug, bookCount);
+        new(category.Id, category.Name, bookCount);
 
     public static BookDto ToDto(this Book book, IDataUriFactory dataUriFactory) =>
         new(

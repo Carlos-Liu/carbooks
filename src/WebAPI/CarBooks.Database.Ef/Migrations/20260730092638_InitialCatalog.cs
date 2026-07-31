@@ -12,12 +12,28 @@ namespace CarBooks.Database.Ef.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Books",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    Author = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    CoverUrl = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    CoverImage = table.Column<byte[]>(type: "bytea", nullable: true),
+                    CoverImageContentType = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Books", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
-                    Slug = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     DisplayOrder = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -26,23 +42,23 @@ namespace CarBooks.Database.Ef.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Books",
+                name: "BookCategories",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Author = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    CoverUrl = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
-                    CoverImage = table.Column<byte[]>(type: "bytea", nullable: true),
-                    CoverImageContentType = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    CategoryId = table.Column<Guid>(type: "uuid", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "integer", nullable: false)
+                    BookId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CategoryId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Books", x => x.Id);
+                    table.PrimaryKey("PK_BookCategories", x => new { x.BookId, x.CategoryId });
                     table.ForeignKey(
-                        name: "FK_Books_Categories_CategoryId",
+                        name: "FK_BookCategories_Books_BookId",
+                        column: x => x.BookId,
+                        principalTable: "Books",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BookCategories_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
                         principalColumn: "Id",
@@ -50,20 +66,22 @@ namespace CarBooks.Database.Ef.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Books_CategoryId_DisplayOrder",
-                table: "Books",
-                columns: new[] { "CategoryId", "DisplayOrder" });
+                name: "IX_BookCategories_CategoryId",
+                table: "BookCategories",
+                column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Categories_Slug",
-                table: "Categories",
-                column: "Slug",
-                unique: true);
+                name: "IX_Books_DisplayOrder",
+                table: "Books",
+                column: "DisplayOrder");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "BookCategories");
+
             migrationBuilder.DropTable(
                 name: "Books");
 

@@ -38,7 +38,7 @@ export default function App() {
       <main className={styles.main}>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/categories/:slug" element={<CategoryBooksPage />} />
+          <Route path="/categories/:categoryId" element={<CategoryBooksPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

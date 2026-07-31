@@ -43,7 +43,7 @@ export function HomePage() {
         <ul className={styles.list}>
           {data?.map((category) => (
             <li key={category.id} className={styles.item}>
-              <AppLink to={`/categories/${category.slug}`}>{category.name}</AppLink>
+              <AppLink to={`/categories/${category.id}`}>{category.name}</AppLink>
               <Caption1>
                 {category.bookCount} {category.bookCount === 1 ? 'book' : 'books'}
               </Caption1>

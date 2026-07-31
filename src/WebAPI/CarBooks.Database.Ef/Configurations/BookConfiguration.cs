@@ -35,6 +35,29 @@ internal sealed class BookConfiguration : IEntityTypeConfiguration<Book>
 
         builder.Ignore(book => book.HasCoverImage);
 
-        builder.HasIndex(book => new { book.CategoryId, book.DisplayOrder });
+        builder.HasIndex(book => book.DisplayOrder);
+
+        builder.HasMany(book => book.Categories)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>(
+                "BookCategories",
+                join => join
+                    .HasOne<Category>()
+                    .WithMany()
+                    .HasForeignKey("CategoryId")
+                    .OnDelete(DeleteBehavior.Cascade),
+                join => join
+                    .HasOne<Book>()
+                    .WithMany()
+                    .HasForeignKey("BookId")
+                    .OnDelete(DeleteBehavior.Cascade),
+                join =>
+                {
+                    join.HasKey("BookId", "CategoryId");
+                    join.ToTable("BookCategories");
+                });
+
+        builder.Navigation(book => book.Categories)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }
