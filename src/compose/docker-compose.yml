@@ -1,0 +1,91 @@
+name: carbooks
+
+services:
+  carbooks-db:
+    image: postgres:18.1
+    container_name: carbooks-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - carbooks-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - carbooks
+
+  carbooks-seq:
+    image: datalust/seq:2026.1
+    container_name: carbooks-seq
+    environment:
+      ACCEPT_EULA: 'Y'
+      SEQ_FIRSTRUN_ADMINPASSWORD: ${SEQ_ADMIN_PASSWORD}
+    volumes:
+      - carbooks-seq-data:/data
+    ports:
+      - '${SEQ_PORT:-8341}:80'
+    networks:
+      - carbooks
+
+  # Standalone Aspire dashboard: the same traces and metrics the AppHost shows locally.
+  carbooks-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:13.4
+    container_name: carbooks-dashboard
+    environment:
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: 'true'
+      DASHBOARD__FRONTEND__AUTHMODE: Unsecured
+      DASHBOARD__OTLP__AUTHMODE: Unsecured
+    ports:
+      - '${DASHBOARD_PORT:-18888}:18888'
+    networks:
+      - carbooks
+
+  carbooks-api:
+    build:
+      context: ../WebAPI
+      dockerfile: CarBooks.WebAPI/Dockerfile
+    image: carbooks/api:${CARBOOKS_VERSION:-latest}
+    container_name: carbooks-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__carbooks: Host=carbooks-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      ConnectionStrings__seq: http://carbooks-seq:80
+      OTEL_SERVICE_NAME: carbooks-api
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://carbooks-dashboard:18889
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      EnableHealthEndpoints: 'true'
+    depends_on:
+      carbooks-db:
+        condition: service_healthy
+      carbooks-seq:
+        condition: service_started
+    networks:
+      - carbooks
+
+  carbooks-web:
+    build:
+      context: ../WebApp
+    image: carbooks/web:${CARBOOKS_VERSION:-latest}
+    container_name: carbooks-web
+    environment:
+      API_HOST: http://carbooks-api:8080
+    ports:
+      - '${WEB_PORT:-8080}:8080'
+    depends_on:
+      - carbooks-api
+    networks:
+      - carbooks
+
+volumes:
+  carbooks-db-data:
+  carbooks-seq-data:
+
+networks:
+  carbooks:
+    driver: bridge

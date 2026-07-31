@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/Aspire/">
+    <Project Path="CarBooks.AppHost/CarBooks.AppHost.csproj" />
+    <Project Path="CarBooks.ServiceDefaults/CarBooks.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/Application/">
+    <Project Path="CarBooks.Application/CarBooks.Application.csproj" />
+    <Project Path="CarBooks.Application.Shared/CarBooks.Application.Shared.csproj" />
+  </Folder>
+  <Folder Name="/Domain/">
+    <Project Path="CarBooks.Domain/CarBooks.Domain.csproj" />
+    <Project Path="CarBooks.Domain.Shared/CarBooks.Domain.Shared.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="CarBooks.Database.Ef/CarBooks.Database.Ef.csproj" />
+    <Project Path="CarBooks.Infrastructure/CarBooks.Infrastructure.csproj" />
+    <Project Path="CarBooks.Repository/CarBooks.Repository.csproj" />
+  </Folder>
+  <Folder Name="/Presentation/">
+    <Project Path="CarBooks.WebAPI/CarBooks.WebAPI.csproj" />
+  </Folder>
+</Solution>
