@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using CarBooks.Domain.Shared;
 using CarBooks.Domain.Shared.Errors;
 
@@ -15,32 +16,36 @@ public sealed class Book : Entity
 {
     private readonly List<Category> categories = [];
 
-    public Book(Guid id, string name, string author, string coverUrl, int displayOrder)
+    public Book(Guid id, string name, string author, string coverUrl)
         : base(id)
     {
-        Name = Guard.Text(name, nameof(Name), CatalogConsts.MaxBookNameLength);
-        Author = Guard.Text(author, nameof(Author), CatalogConsts.MaxBookAuthorLength);
-        CoverUrl = Guard.AbsoluteUrl(coverUrl, nameof(CoverUrl), CatalogConsts.MaxCoverUrlLength);
-        DisplayOrder = Guard.NotNegative(displayOrder, nameof(DisplayOrder));
+        Name = Guard.Text(name, nameof(Name));
+        Author = Guard.Text(author, nameof(Author));
+        CoverUrl = Guard.AbsoluteUrl(coverUrl, nameof(CoverUrl));
     }
 
     private Book()
     {
     }
 
+    [Required]
+    [MaxLength(CatalogConsts.MaxBookNameLength)]
     public string Name { get; private set; } = string.Empty;
 
+    [Required]
+    [MaxLength(CatalogConsts.MaxBookAuthorLength)]
     public string Author { get; private set; } = string.Empty;
 
     /// <summary>Absolute URL of the cover artwork hosted outside the application.</summary>
+    [Required]
+    [MaxLength(CatalogConsts.MaxCoverUrlLength)]
     public string CoverUrl { get; private set; } = string.Empty;
 
     /// <summary>Locally stored cover artwork, or <see langword="null"/> when only the URL is known.</summary>
     public byte[]? CoverImage { get; private set; }
 
+    [MaxLength(CatalogConsts.MaxContentTypeLength)]
     public string? CoverImageContentType { get; private set; }
-
-    public int DisplayOrder { get; private set; }
 
     public IReadOnlyList<Category> Categories => categories;
 
@@ -73,7 +78,7 @@ public sealed class Book : Entity
         }
 
         CoverImage = content;
-        CoverImageContentType = Guard.Text(contentType, nameof(CoverImageContentType), CatalogConsts.MaxContentTypeLength);
+        CoverImageContentType = Guard.Text(contentType, nameof(CoverImageContentType));
     }
 
     public void ClearCoverImage()

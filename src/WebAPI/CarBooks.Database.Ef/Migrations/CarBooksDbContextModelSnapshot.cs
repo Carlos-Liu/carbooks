@@ -60,17 +60,12 @@ namespace CarBooks.Database.Ef.Migrations
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)");
 
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DisplayOrder");
 
                     b.ToTable("Books", (string)null);
                 });
@@ -80,9 +75,6 @@ namespace CarBooks.Database.Ef.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()

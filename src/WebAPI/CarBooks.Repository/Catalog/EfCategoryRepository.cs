@@ -17,8 +17,7 @@ internal sealed class EfCategoryRepository : ICategoryRepository
     public async Task<IReadOnlyList<Category>> ListAsync(CancellationToken cancellationToken) =>
         await dbContext.Categories
             .AsNoTracking()
-            .OrderBy(category => category.DisplayOrder)
-            .ThenBy(category => category.Name)
+            .OrderBy(category => category.Name)
             .ToListAsync(cancellationToken);
 
     public Task<Category?> FindAsync(Guid id, CancellationToken cancellationToken) =>

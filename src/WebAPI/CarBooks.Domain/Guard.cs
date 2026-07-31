@@ -5,28 +5,23 @@ namespace CarBooks.Domain;
 /// <summary>
 /// Invariant checks used by entity constructors and mutators. Failures surface as
 /// <see cref="DomainValidationException"/> so the API can translate them into 400 responses.
+/// Length limits live on the entities as <c>[MaxLength]</c> and are applied by EF / validators.
 /// </summary>
 public static class Guard
 {
-    public static string Text(string? value, string fieldName, int maxLength)
+    public static string Text(string? value, string fieldName)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
             throw new DomainValidationException($"{fieldName} is required.");
         }
 
-        var trimmed = value.Trim();
-        if (trimmed.Length > maxLength)
-        {
-            throw new DomainValidationException($"{fieldName} must be {maxLength} characters or fewer.");
-        }
-
-        return trimmed;
+        return value.Trim();
     }
 
-    public static string AbsoluteUrl(string? value, string fieldName, int maxLength)
+    public static string AbsoluteUrl(string? value, string fieldName)
     {
-        var trimmed = Text(value, fieldName, maxLength);
+        var trimmed = Text(value, fieldName);
         if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri)
             || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
         {
@@ -34,15 +29,5 @@ public static class Guard
         }
 
         return trimmed;
-    }
-
-    public static int NotNegative(int value, string fieldName)
-    {
-        if (value < 0)
-        {
-            throw new DomainValidationException($"{fieldName} must not be negative.");
-        }
-
-        return value;
     }
 }

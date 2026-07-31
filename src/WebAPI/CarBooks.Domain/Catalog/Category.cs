@@ -8,10 +8,10 @@ namespace CarBooks.Domain.Catalog;
 /// </summary>
 public sealed class Category : Entity
 {
-    public Category(Guid id, string name, int displayOrder)
+    public Category(Guid id, string name)
         : base(id)
     {
-        DisplayOrder = Guard.NotNegative(displayOrder, nameof(DisplayOrder));
+        Name = Guard.Text(name, nameof(Name));
     }
 
     private Category()
@@ -21,9 +21,4 @@ public sealed class Category : Entity
     [Required]
     [MaxLength(CatalogConsts.MaxCategoryNameLength)]
     public string Name { get; private set; } = string.Empty;
-
-    public int DisplayOrder { get; private set; }
-
-    public void Rename(string name) =>
-        Name = Guard.Text(name, nameof(Name), CatalogConsts.MaxCategoryNameLength);
 }

@@ -1,8 +1,8 @@
 namespace CarBooks.Domain.Shared;
 
 /// <summary>
-/// Field limits shared by the domain model, the EF Core mapping and the API contract so all three
-/// agree on what a valid catalog record looks like.
+/// Field limits used by entity <c>[MaxLength]</c> attributes (and thus by EF Core conventions) and
+/// by API contracts so they agree on what a valid catalog record looks like.
 /// </summary>
 public static class CatalogConsts
 {

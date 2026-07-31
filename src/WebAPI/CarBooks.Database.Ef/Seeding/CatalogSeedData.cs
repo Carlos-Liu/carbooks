@@ -12,16 +12,13 @@ internal static class CatalogSeedData
     {
         var category1 = new Category(
             Guid.Parse("11111111-1111-4111-8111-111111110001"),
-            "Category 1",
-            displayOrder: 1);
+            "Category 1");
         var category2 = new Category(
             Guid.Parse("11111111-1111-4111-8111-111111110002"),
-            "Category 2",
-            displayOrder: 2);
+            "Category 2");
         var category3 = new Category(
             Guid.Parse("11111111-1111-4111-8111-111111110003"),
-            "Category 3",
-            displayOrder: 3);
+            "Category 3");
 
         var books = new List<Book>
         {
@@ -29,7 +26,6 @@ internal static class CatalogSeedData
                 "22222222-2222-4222-8222-222222220001",
                 "Go Like Hell",
                 "A. J. Baime",
-                displayOrder: 1,
                 topColor: "#334155",
                 bottomColor: "#0f172a",
                 category1),
@@ -37,7 +33,6 @@ internal static class CatalogSeedData
                 "22222222-2222-4222-8222-222222220002",
                 "The Limit",
                 "Michael Cannell",
-                displayOrder: 2,
                 topColor: "#334155",
                 bottomColor: "#0f172a",
                 category1),
@@ -45,7 +40,6 @@ internal static class CatalogSeedData
                 "22222222-2222-4222-8222-222222220003",
                 "Ferrari Rex",
                 "Luca Dal Monte",
-                displayOrder: 3,
                 topColor: "#334155",
                 bottomColor: "#0f172a",
                 category1),
@@ -53,7 +47,6 @@ internal static class CatalogSeedData
                 "22222222-2222-4222-8222-222222220004",
                 "How to Build a Car",
                 "Adrian Newey",
-                displayOrder: 1,
                 topColor: "#9f1239",
                 bottomColor: "#4c0519",
                 category2),
@@ -61,7 +54,6 @@ internal static class CatalogSeedData
                 "22222222-2222-4222-8222-222222220005",
                 "Total Competition",
                 "Ross Brawn and Adam Parr",
-                displayOrder: 2,
                 topColor: "#9f1239",
                 bottomColor: "#4c0519",
                 category2),
@@ -69,7 +61,6 @@ internal static class CatalogSeedData
                 "22222222-2222-4222-8222-222222220006",
                 "The Mechanic",
                 "Marc Priestley",
-                displayOrder: 3,
                 topColor: "#9f1239",
                 bottomColor: "#4c0519",
                 category2),
@@ -77,7 +68,6 @@ internal static class CatalogSeedData
                 "22222222-2222-4222-8222-222222220007",
                 "Faster",
                 "Neal Bascomb",
-                displayOrder: 1,
                 topColor: "#166534",
                 bottomColor: "#052e16",
                 category3),
@@ -85,7 +75,6 @@ internal static class CatalogSeedData
                 "22222222-2222-4222-8222-222222220008",
                 "The Art of the Formula 1 Race Car",
                 "Stuart Codling",
-                displayOrder: 2,
                 topColor: "#166534",
                 bottomColor: "#052e16",
                 category3),
@@ -93,7 +82,6 @@ internal static class CatalogSeedData
                 "22222222-2222-4222-8222-222222220009",
                 "Car Guys vs. Bean Counters",
                 "Bob Lutz",
-                displayOrder: 3,
                 topColor: "#166534",
                 bottomColor: "#052e16",
                 category3),
@@ -106,7 +94,6 @@ internal static class CatalogSeedData
         string id,
         string name,
         string author,
-        int displayOrder,
         string topColor,
         string bottomColor,
         params Category[] categories)
@@ -115,8 +102,7 @@ internal static class CatalogSeedData
             Guid.Parse(id),
             name,
             author,
-            BuildCoverUrl(name, topColor),
-            displayOrder);
+            BuildCoverUrl(name, topColor));
 
         foreach (var category in categories)
         {

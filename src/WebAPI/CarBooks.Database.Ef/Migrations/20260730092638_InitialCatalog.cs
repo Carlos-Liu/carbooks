@@ -20,8 +20,7 @@ namespace CarBooks.Database.Ef.Migrations
                     Author = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     CoverUrl = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
                     CoverImage = table.Column<byte[]>(type: "bytea", nullable: true),
-                    CoverImageContentType = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    DisplayOrder = table.Column<int>(type: "integer", nullable: false)
+                    CoverImageContentType = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -33,8 +32,7 @@ namespace CarBooks.Database.Ef.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    DisplayOrder = table.Column<int>(type: "integer", nullable: false)
+                    Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,11 +67,6 @@ namespace CarBooks.Database.Ef.Migrations
                 name: "IX_BookCategories_CategoryId",
                 table: "BookCategories",
                 column: "CategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Books_DisplayOrder",
-                table: "Books",
-                column: "DisplayOrder");
         }
 
         /// <inheritdoc />
