@@ -17,6 +17,10 @@ public sealed class ApplicationModule : Module
             .AsSelf()
             .InstancePerLifetimeScope();
 
+        builder.RegisterType<BookManager>()
+            .AsSelf()
+            .InstancePerLifetimeScope();
+
         builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
             .Where(type => typeof(IApplicationService).IsAssignableFrom(type) && type is { IsAbstract: false, IsClass: true })
             .AsImplementedInterfaces()

@@ -29,22 +29,22 @@ public sealed class Book : Entity
     }
 
     [Required]
-    [MaxLength(CatalogConsts.MaxBookNameLength)]
+    [MaxLength(Consts.MaxBookNameLength)]
     public string Name { get; private set; } = string.Empty;
 
     [Required]
-    [MaxLength(CatalogConsts.MaxBookAuthorLength)]
+    [MaxLength(Consts.MaxBookAuthorLength)]
     public string Author { get; private set; } = string.Empty;
 
     /// <summary>Absolute URL of the cover artwork hosted outside the application.</summary>
     [Required]
-    [MaxLength(CatalogConsts.MaxCoverUrlLength)]
+    [MaxLength(Consts.MaxCoverUrlLength)]
     public string CoverUrl { get; private set; } = string.Empty;
 
     /// <summary>Locally stored cover artwork, or <see langword="null"/> when only the URL is known.</summary>
     public byte[]? CoverImage { get; private set; }
 
-    [MaxLength(CatalogConsts.MaxContentTypeLength)]
+    [MaxLength(Consts.MaxContentTypeLength)]
     public string? CoverImageContentType { get; private set; }
 
     public IReadOnlyList<Category> Categories => categories;

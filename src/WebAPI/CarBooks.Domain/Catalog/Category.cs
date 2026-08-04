@@ -19,6 +19,6 @@ public sealed class Category : Entity
     }
 
     [Required]
-    [MaxLength(CatalogConsts.MaxCategoryNameLength)]
+    [MaxLength(Consts.MaxCategoryNameLength)]
     public string Name { get; private set; } = string.Empty;
 }

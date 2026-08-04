@@ -8,4 +8,6 @@ public interface IBookRepository
     Task<IReadOnlyList<Book>> ListByCategoryAsync(Guid categoryId, CancellationToken cancellationToken);
 
     Task<Book?> FindAsync(Guid bookId, CancellationToken cancellationToken);
+
+    Task AddAsync(Book book, CancellationToken cancellationToken);
 }

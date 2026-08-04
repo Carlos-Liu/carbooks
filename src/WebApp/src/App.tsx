@@ -1,6 +1,7 @@
 import { Caption1, Title1, makeStyles, tokens } from '@fluentui/react-components';
 import { Route, Routes } from 'react-router';
 
+import { AddBookPage } from './pages/AddBookPage';
 import { CategoryBooksPage } from './pages/CategoryBooksPage';
 import { HomePage } from './pages/HomePage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -38,6 +39,7 @@ export default function App() {
       <main className={styles.main}>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/books/new" element={<AddBookPage />} />
           <Route path="/categories/:categoryId" element={<CategoryBooksPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

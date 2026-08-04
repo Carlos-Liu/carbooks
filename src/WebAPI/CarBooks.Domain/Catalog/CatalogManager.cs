@@ -4,8 +4,7 @@ using CarBooks.Domain.Shared.Errors;
 namespace CarBooks.Domain.Catalog;
 
 /// <summary>
-/// Domain service coordinating independent category and book aggregates. It owns the rules that
-/// span both of them, keeping the application layer free of business decisions.
+/// Domain service coordinating category and book aggregates when a use case spans both.
 /// </summary>
 public sealed class CatalogManager
 {

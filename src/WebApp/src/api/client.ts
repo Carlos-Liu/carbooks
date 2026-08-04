@@ -27,6 +27,22 @@ export async function getJson<T>(path: string, signal?: AbortSignal): Promise<T>
   return (await response.json()) as T;
 }
 
+/** Posts multipart form data (for example a book create with an optional image file). */
+export async function postForm<T>(path: string, formData: FormData, signal?: AbortSignal): Promise<T> {
+  const response = await fetch(`${apiBasePath}${path}`, {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+    body: formData,
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new ApiError(response.status, await readProblemDetail(response));
+  }
+
+  return (await response.json()) as T;
+}
+
 /** Pulls the message out of an RFC 7807 payload, falling back to the status text. */
 async function readProblemDetail(response: Response): Promise<string> {
   try {

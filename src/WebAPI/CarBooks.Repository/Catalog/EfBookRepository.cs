@@ -26,4 +26,10 @@ internal sealed class EfBookRepository : IBookRepository
             .AsNoTracking()
             .Include(book => book.Categories)
             .FirstOrDefaultAsync(book => book.Id == bookId, cancellationToken);
+
+    public async Task AddAsync(Book book, CancellationToken cancellationToken)
+    {
+        await dbContext.Books.AddAsync(book, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

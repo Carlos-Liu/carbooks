@@ -12,6 +12,14 @@ const useStyles = makeStyles({
     rowGap: tokens.spacingVerticalXS,
     marginBottom: tokens.spacingVerticalXL,
   },
+  introRow: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    columnGap: tokens.spacingHorizontalL,
+    rowGap: tokens.spacingVerticalS,
+  },
   list: {
     display: 'flex',
     flexDirection: 'column',
@@ -35,8 +43,13 @@ export function HomePage() {
   return (
     <section>
       <div className={styles.intro}>
-        <Title2>Browse by category</Title2>
-        <Body1>Choose a category to see the books it contains.</Body1>
+        <div className={styles.introRow}>
+          <div>
+            <Title2>Browse by category</Title2>
+            <Body1>Choose a category to see the books it contains.</Body1>
+          </div>
+          <AppLink to="/books/new">Add a book</AppLink>
+        </div>
       </div>
 
       <AsyncBoundary isPending={isPending} error={error} onRetry={() => void refetch()}>
