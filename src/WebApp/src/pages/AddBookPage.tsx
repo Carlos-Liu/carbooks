@@ -1,22 +1,25 @@
 import {
   Body1,
   Button,
+  Dropdown,
   Field,
   Input,
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
+  Option,
+  Spinner,
   Textarea,
   Title2,
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { ApiError } from '../api/client';
-import { createBook } from '../api/catalog';
+import { categoriesQuery, createBook } from '../api/catalog';
 import { AppLink } from '../components/AppLink';
 
 const useStyles = makeStyles({
@@ -48,6 +51,13 @@ const useStyles = makeStyles({
 export function AddBookPage() {
   const styles = useStyles();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const {
+    data: categories,
+    isPending: categoriesPending,
+    error: categoriesError,
+  } = useQuery(categoriesQuery());
 
   const [name, setName] = useState('');
   const [author, setAuthor] = useState('');
@@ -59,6 +69,7 @@ export function AddBookPage() {
   const [coverUrl, setCoverUrl] = useState('');
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
 
   useEffect(() => {
     return () => {
@@ -70,7 +81,8 @@ export function AddBookPage() {
 
   const mutation = useMutation({
     mutationFn: (input: Parameters<typeof createBook>[0]) => createBook(input),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['categories'] });
       void navigate('/');
     },
   });
@@ -98,8 +110,14 @@ export function AddBookPage() {
       isbn: isbn.trim() || undefined,
       coverUrl: coverUrl.trim() || undefined,
       coverImage,
+      categoryIds: selectedCategoryIds,
     });
   };
+
+  const selectedCategoryNames = (categories ?? [])
+    .filter((category) => selectedCategoryIds.includes(category.id))
+    .map((category) => category.name)
+    .join(', ');
 
   const errorMessage =
     mutation.error instanceof ApiError || mutation.error instanceof Error
@@ -113,7 +131,7 @@ export function AddBookPage() {
       <div className={styles.header}>
         <AppLink to="/">Back to categories</AppLink>
         <Title2>Add a book</Title2>
-        <Body1>Create a catalog entry and optionally upload a local cover image.</Body1>
+        <Body1>Create a catalog entry and optionally assign categories and a cover image.</Body1>
       </div>
 
       <form className={styles.form} onSubmit={onSubmit}>
@@ -154,6 +172,36 @@ export function AddBookPage() {
           <Input value={isbn} onChange={(_, data) => setIsbn(data.value)} maxLength={32} />
         </Field>
 
+        <Field
+          label="Categories"
+          hint="Optional. Select one or more categories. Names are shown; IDs are sent to the API."
+        >
+          {categoriesPending ? (
+            <Spinner size="tiny" label="Loading categories…" />
+          ) : categoriesError ? (
+            <MessageBar intent="error">
+              <MessageBarBody>
+                <MessageBarTitle>Could not load categories</MessageBarTitle>
+                {categoriesError instanceof Error ? categoriesError.message : 'Unexpected error.'}
+              </MessageBarBody>
+            </MessageBar>
+          ) : (
+            <Dropdown
+              multiselect
+              placeholder="Select categories"
+              selectedOptions={selectedCategoryIds}
+              value={selectedCategoryNames}
+              onOptionSelect={(_, data) => setSelectedCategoryIds(data.selectedOptions)}
+            >
+              {(categories ?? []).map((category) => (
+                <Option key={category.id} value={category.id} text={category.name}>
+                  {category.name}
+                </Option>
+              ))}
+            </Dropdown>
+          )}
+        </Field>
+
         <Field label="Cover URL" hint="Optional absolute http(s) URL of the publisher artwork.">
           <Input
             type="url"
@@ -185,7 +233,7 @@ export function AddBookPage() {
         ) : null}
 
         <div className={styles.actions}>
-          <Button type="submit" appearance="primary" disabled={mutation.isPending}>
+          <Button type="submit" appearance="primary" disabled={mutation.isPending || categoriesPending}>
             {mutation.isPending ? 'Saving…' : 'Add book'}
           </Button>
           <Button type="button" appearance="secondary" onClick={() => void navigate('/')}>

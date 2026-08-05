@@ -26,6 +26,7 @@ export interface CreateBookInput {
   isbn?: string;
   coverUrl?: string;
   coverImage?: File | null;
+  categoryIds?: string[];
 }
 
 export async function createBook(input: CreateBookInput, signal?: AbortSignal): Promise<Book> {
@@ -59,6 +60,10 @@ export async function createBook(input: CreateBookInput, signal?: AbortSignal): 
 
   if (input.coverImage) {
     formData.append('coverImage', input.coverImage);
+  }
+
+  for (const categoryId of input.categoryIds ?? []) {
+    formData.append('categoryIds', categoryId);
   }
 
   return postForm<Book>('/books', formData, signal);

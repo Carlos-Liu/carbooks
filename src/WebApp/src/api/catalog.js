@@ -33,5 +33,8 @@ export async function createBook(input, signal) {
     if (input.coverImage) {
         formData.append('coverImage', input.coverImage);
     }
+    for (const categoryId of input.categoryIds ?? []) {
+        formData.append('categoryIds', categoryId);
+    }
     return postForm('/books', formData, signal);
 }

@@ -25,5 +25,6 @@ export interface CreateBookInput {
     isbn?: string;
     coverUrl?: string;
     coverImage?: File | null;
+    categoryIds?: string[];
 }
 export declare function createBook(input: CreateBookInput, signal?: AbortSignal): Promise<Book>;
