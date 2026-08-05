@@ -14,6 +14,8 @@ public sealed class CarBooksDbContext : DbContext
 
     public DbSet<Book> Books => Set<Book>();
 
+    public DbSet<CategoryBooks> CategoryBooks => Set<CategoryBooks>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

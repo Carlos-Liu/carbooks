@@ -22,21 +22,6 @@ namespace CarBooks.Database.Ef.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("BookCategories", b =>
-                {
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("BookId", "CategoryId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("BookCategories", (string)null);
-                });
-
             modelBuilder.Entity("CarBooks.Domain.Catalog.Book", b =>
                 {
                     b.Property<Guid>("Id")
@@ -68,12 +53,12 @@ namespace CarBooks.Database.Ef.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<DateOnly?>("PublishedOn")
+                        .HasColumnType("date");
+
                     b.Property<string>("Publisher")
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
-
-                    b.Property<DateOnly?>("PublishedOn")
-                        .HasColumnType("date");
 
                     b.Property<string>("Recommendation")
                         .HasMaxLength(1024)
@@ -104,7 +89,22 @@ namespace CarBooks.Database.Ef.Migrations
                     b.ToTable("Categories", (string)null);
                 });
 
-            modelBuilder.Entity("BookCategories", b =>
+            modelBuilder.Entity("CarBooks.Domain.Catalog.CategoryBooks", b =>
+                {
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("CategoryId", "BookId");
+
+                    b.HasIndex("BookId");
+
+                    b.ToTable("CategoryBooks", (string)null);
+                });
+
+            modelBuilder.Entity("CarBooks.Domain.Catalog.CategoryBooks", b =>
                 {
                     b.HasOne("CarBooks.Domain.Catalog.Book", null)
                         .WithMany()
@@ -117,13 +117,6 @@ namespace CarBooks.Database.Ef.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("CarBooks.Domain.Catalog.Book", b =>
-                {
-                    b.HasMany("CarBooks.Domain.Catalog.Category", "Categories")
-                        .WithMany()
-                        .UsingEntity("BookCategories");
                 });
 #pragma warning restore 612, 618
         }

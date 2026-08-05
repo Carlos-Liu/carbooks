@@ -1,6 +1,5 @@
 using CarBooks.Domain.Catalog;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CarBooks.Database.Ef.Configurations;
@@ -18,28 +17,5 @@ internal sealed class BookConfiguration : IEntityTypeConfiguration<Book>
         builder.Property(book => book.PublishedOn).HasColumnType("date");
 
         builder.Ignore(book => book.HasCoverImage);
-
-        builder.HasMany(book => book.Categories)
-            .WithMany()
-            .UsingEntity<Dictionary<string, object>>(
-                "BookCategories",
-                join => join
-                    .HasOne<Category>()
-                    .WithMany()
-                    .HasForeignKey("CategoryId")
-                    .OnDelete(DeleteBehavior.Cascade),
-                join => join
-                    .HasOne<Book>()
-                    .WithMany()
-                    .HasForeignKey("BookId")
-                    .OnDelete(DeleteBehavior.Cascade),
-                join =>
-                {
-                    join.HasKey("BookId", "CategoryId");
-                    join.ToTable("BookCategories");
-                });
-
-        builder.Navigation(book => book.Categories)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

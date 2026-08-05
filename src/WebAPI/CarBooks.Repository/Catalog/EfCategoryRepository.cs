@@ -26,10 +26,9 @@ internal sealed class EfCategoryRepository : ICategoryRepository
             .FirstOrDefaultAsync(category => category.Id == id, cancellationToken);
 
     public async Task<IReadOnlyDictionary<Guid, int>> CountBooksByCategoryAsync(CancellationToken cancellationToken) =>
-        await dbContext.Books
+        await dbContext.CategoryBooks
             .AsNoTracking()
-            .SelectMany(book => book.Categories)
-            .GroupBy(category => category.Id)
+            .GroupBy(link => link.CategoryId)
             .Select(group => new { CategoryId = group.Key, Count = group.Count() })
             .ToDictionaryAsync(row => row.CategoryId, row => row.Count, cancellationToken);
 }

@@ -45,4 +45,6 @@ public sealed class CreateBookDto
 
     /// <summary>Optional cover image selected from the caller's local machine.</summary>
     public IFormFile? CoverImage { get; init; }
+
+    public IList<Guid> CategoryIds { get; init; } = new List<Guid>();
 }

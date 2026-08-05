@@ -5,7 +5,7 @@ using CarBooks.Domain.Shared.Errors;
 namespace CarBooks.Domain.Catalog;
 
 /// <summary>
-/// An independent book that may belong to zero or more <see cref="Category"/> entries.
+/// An independent book that may belong to zero or more categories via <see cref="CategoryBooks"/>.
 /// </summary>
 /// <remarks>
 /// A cover can be supplied two ways: <see cref="CoverUrl"/> may point at publisher artwork,
@@ -14,8 +14,6 @@ namespace CarBooks.Domain.Catalog;
 /// </remarks>
 public sealed class Book : Entity
 {
-    private readonly List<Category> categories = [];
-
     public Book(
         Guid id,
         string name,
@@ -75,28 +73,8 @@ public sealed class Book : Entity
     [MaxLength(Consts.MaxContentTypeLength)]
     public string? CoverImageContentType { get; private set; }
 
-    public IReadOnlyList<Category> Categories => categories;
-
     public bool HasCoverImage =>
         CoverImage is { Length: > 0 } && !string.IsNullOrWhiteSpace(CoverImageContentType);
-
-    public void AssignToCategory(Category category)
-    {
-        ArgumentNullException.ThrowIfNull(category);
-
-        if (categories.Any(existing => existing.Id == category.Id))
-        {
-            return;
-        }
-
-        categories.Add(category);
-    }
-
-    public void RemoveFromCategory(Category category)
-    {
-        ArgumentNullException.ThrowIfNull(category);
-        categories.RemoveAll(existing => existing.Id == category.Id);
-    }
 
     public void SetCoverImage(byte[] content, string contentType)
     {

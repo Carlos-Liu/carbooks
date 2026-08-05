@@ -27,15 +27,12 @@ public sealed class CatalogManager
     /// Resolves a category by its id together with its books.
     /// </summary>
     /// <exception cref="EntityNotFoundException">No category carries the requested id.</exception>
-    public async Task<CategoryBooks> GetCategoryBooksAsync(Guid categoryId, CancellationToken cancellationToken)
+    public async Task<CategoryWithBooks> GetCategoryBooksAsync(Guid categoryId, CancellationToken cancellationToken)
     {
         var category = await categoryRepository.FindAsync(categoryId, cancellationToken)
             ?? throw new EntityNotFoundException(nameof(Category), categoryId);
 
         var books = await bookRepository.ListByCategoryAsync(category.Id, cancellationToken);
-        return new CategoryBooks(category, books);
+        return new CategoryWithBooks(category, books);
     }
 }
-
-/// <summary>A category paired with the books it contains.</summary>
-public sealed record CategoryBooks(Category Category, IReadOnlyList<Book> Books);

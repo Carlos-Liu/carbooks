@@ -9,13 +9,22 @@ namespace CarBooks.Domain.Catalog;
 public sealed class BookManager
 {
     private readonly IBookRepository bookRepository;
+    private readonly ICategoryRepository categoryRepository;
+    private readonly ICategoryBooksRepository categoryBooksRepository;
 
-    public BookManager(IBookRepository bookRepository)
+    public BookManager(
+        IBookRepository bookRepository,
+        ICategoryRepository categoryRepository,
+        ICategoryBooksRepository categoryBooksRepository)
     {
         this.bookRepository = bookRepository;
+        this.categoryRepository = categoryRepository;
+        this.categoryBooksRepository = categoryBooksRepository;
     }
 
-    /// <summary>Creates and persists a new book, optionally with a locally uploaded cover image.</summary>
+    /// <summary>
+    /// Creates and persists a new book, optionally with a cover image and category assignments.
+    /// </summary>
     public async Task<Book> AddBookAsync(
         string name,
         string author,
@@ -27,6 +36,7 @@ public sealed class BookManager
         string? isbn,
         byte[]? coverImage,
         string? coverImageContentType,
+        IEnumerable<Guid> categoryIds,
         CancellationToken cancellationToken)
     {
         var book = new Book(
@@ -51,6 +61,23 @@ public sealed class BookManager
         }
 
         await bookRepository.AddAsync(book, cancellationToken);
+
+        var distinctCategoryIds = categoryIds.Distinct().ToList();
+        if (distinctCategoryIds.Count == 0)
+        {
+            return book;
+        }
+
+        var links = new List<CategoryBooks>(distinctCategoryIds.Count);
+        foreach (var categoryId in distinctCategoryIds)
+        {
+            _ = await categoryRepository.FindAsync(categoryId, cancellationToken)
+                ?? throw new EntityNotFoundException(nameof(Category), categoryId);
+
+            links.Add(new CategoryBooks(categoryId, book.Id));
+        }
+
+        await categoryBooksRepository.AddRangeAsync(links, cancellationToken);
         return book;
     }
 }

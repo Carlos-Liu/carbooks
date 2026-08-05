@@ -23,9 +23,10 @@ public sealed class CarBooksDbSeeder
             return false;
         }
 
-        var (categories, books) = CatalogSeedData.CreateCatalog();
+        var (categories, books, links) = CatalogSeedData.CreateCatalog();
         await dbContext.Categories.AddRangeAsync(categories, cancellationToken);
         await dbContext.Books.AddRangeAsync(books, cancellationToken);
+        await dbContext.CategoryBooks.AddRangeAsync(links, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         return true;
     }

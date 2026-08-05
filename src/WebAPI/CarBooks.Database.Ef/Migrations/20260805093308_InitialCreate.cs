@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CarBooks.Database.Ef.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCatalog : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -45,23 +45,23 @@ namespace CarBooks.Database.Ef.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BookCategories",
+                name: "CategoryBooks",
                 columns: table => new
                 {
-                    BookId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CategoryId = table.Column<Guid>(type: "uuid", nullable: false)
+                    CategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    BookId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BookCategories", x => new { x.BookId, x.CategoryId });
+                    table.PrimaryKey("PK_CategoryBooks", x => new { x.CategoryId, x.BookId });
                     table.ForeignKey(
-                        name: "FK_BookCategories_Books_BookId",
+                        name: "FK_CategoryBooks_Books_BookId",
                         column: x => x.BookId,
                         principalTable: "Books",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BookCategories_Categories_CategoryId",
+                        name: "FK_CategoryBooks_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
                         principalColumn: "Id",
@@ -69,16 +69,16 @@ namespace CarBooks.Database.Ef.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BookCategories_CategoryId",
-                table: "BookCategories",
-                column: "CategoryId");
+                name: "IX_CategoryBooks_BookId",
+                table: "CategoryBooks",
+                column: "BookId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "BookCategories");
+                name: "CategoryBooks");
 
             migrationBuilder.DropTable(
                 name: "Books");
