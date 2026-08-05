@@ -18,7 +18,12 @@ namespace CarBooks.Database.Ef.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     Author = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    CoverUrl = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    Translator = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    Publisher = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    PublishedOn = table.Column<DateOnly>(type: "date", nullable: true),
+                    Recommendation = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
+                    Isbn = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    CoverUrl = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
                     CoverImage = table.Column<byte[]>(type: "bytea", nullable: true),
                     CoverImageContentType = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true)
                 },

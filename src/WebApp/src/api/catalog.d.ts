@@ -18,7 +18,12 @@ export declare const categoryBooksQuery: (categoryId: string) => import("@tansta
 export interface CreateBookInput {
     name: string;
     author: string;
-    coverUrl: string;
+    translator?: string;
+    publisher?: string;
+    publishedOn?: string;
+    recommendation?: string;
+    isbn?: string;
+    coverUrl?: string;
     coverImage?: File | null;
 }
 export declare function createBook(input: CreateBookInput, signal?: AbortSignal): Promise<Book>;

@@ -6,6 +6,7 @@ import {
   MessageBar,
   MessageBarBody,
   MessageBarTitle,
+  Textarea,
   Title2,
   makeStyles,
   tokens,
@@ -50,6 +51,11 @@ export function AddBookPage() {
 
   const [name, setName] = useState('');
   const [author, setAuthor] = useState('');
+  const [translator, setTranslator] = useState('');
+  const [publisher, setPublisher] = useState('');
+  const [publishedOn, setPublishedOn] = useState('');
+  const [recommendation, setRecommendation] = useState('');
+  const [isbn, setIsbn] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -85,7 +91,12 @@ export function AddBookPage() {
     mutation.mutate({
       name: name.trim(),
       author: author.trim(),
-      coverUrl: coverUrl.trim(),
+      translator: translator.trim() || undefined,
+      publisher: publisher.trim() || undefined,
+      publishedOn: publishedOn || undefined,
+      recommendation: recommendation.trim() || undefined,
+      isbn: isbn.trim() || undefined,
+      coverUrl: coverUrl.trim() || undefined,
       coverImage,
     });
   };
@@ -114,13 +125,41 @@ export function AddBookPage() {
           <Input value={author} onChange={(_, data) => setAuthor(data.value)} maxLength={64} required />
         </Field>
 
-        <Field label="Cover URL" required hint="Absolute http(s) URL of the publisher artwork.">
+        <Field label="Translator">
+          <Input value={translator} onChange={(_, data) => setTranslator(data.value)} maxLength={64} />
+        </Field>
+
+        <Field label="Publisher">
+          <Input value={publisher} onChange={(_, data) => setPublisher(data.value)} maxLength={32} />
+        </Field>
+
+        <Field label="Published on" hint="Date only, no time.">
+          <Input
+            type="date"
+            value={publishedOn}
+            onChange={(_, data) => setPublishedOn(data.value)}
+          />
+        </Field>
+
+        <Field label="Recommendation">
+          <Textarea
+            value={recommendation}
+            onChange={(_, data) => setRecommendation(data.value)}
+            maxLength={1024}
+            rows={4}
+          />
+        </Field>
+
+        <Field label="ISBN" hint="Optional. Up to 32 characters.">
+          <Input value={isbn} onChange={(_, data) => setIsbn(data.value)} maxLength={32} />
+        </Field>
+
+        <Field label="Cover URL" hint="Optional absolute http(s) URL of the publisher artwork.">
           <Input
             type="url"
             value={coverUrl}
             onChange={(_, data) => setCoverUrl(data.value)}
             maxLength={2048}
-            required
           />
         </Field>
 

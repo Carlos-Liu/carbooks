@@ -19,9 +19,40 @@ public static class Guard
         return value.Trim();
     }
 
+    /// <summary>Trims optional text; blank input becomes <see langword="null"/>.</summary>
+    public static string? OptionalText(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        return value.Trim();
+    }
+
     public static string AbsoluteUrl(string? value, string fieldName)
     {
         var trimmed = Text(value, fieldName);
+        if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri)
+            || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            throw new DomainValidationException($"{fieldName} must be an absolute http or https URL.");
+        }
+
+        return trimmed;
+    }
+
+    /// <summary>
+    /// Optional absolute http(s) URL; blank input becomes <see langword="null"/>.
+    /// </summary>
+    public static string? OptionalAbsoluteUrl(string? value, string fieldName)
+    {
+        var trimmed = OptionalText(value);
+        if (trimmed is null)
+        {
+            return null;
+        }
+
         if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri)
             || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
         {

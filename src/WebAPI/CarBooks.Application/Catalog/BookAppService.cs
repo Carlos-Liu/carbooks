@@ -64,6 +64,11 @@ internal sealed class BookAppService : IBookAppService
             request.Name,
             request.Author,
             request.CoverUrl,
+            request.Translator,
+            request.Publisher,
+            request.PublishedOn,
+            request.Recommendation,
+            request.Isbn,
             coverImage,
             contentType,
             cancellationToken);

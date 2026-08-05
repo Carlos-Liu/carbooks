@@ -59,12 +59,30 @@ namespace CarBooks.Database.Ef.Migrations
                         .HasColumnType("character varying(128)");
 
                     b.Property<string>("CoverUrl")
-                        .IsRequired()
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)");
 
+                    b.Property<string>("Isbn")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Publisher")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateOnly?>("PublishedOn")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Recommendation")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<string>("Translator")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 

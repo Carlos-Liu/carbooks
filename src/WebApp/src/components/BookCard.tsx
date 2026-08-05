@@ -19,6 +19,8 @@ const useStyles = makeStyles({
   preview: {
     display: 'flex',
     justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '260px',
     backgroundColor: tokens.colorNeutralBackground3,
   },
   cover: {
@@ -38,25 +40,45 @@ interface BookCardProps {
 export function BookCard({ book }: BookCardProps) {
   const styles = useStyles();
 
-  // The locally stored cover keeps the page intact when the publisher host is unreachable.
-  const coverSource = book.coverImage ?? book.coverUrl;
+  // Prefer the locally stored cover when the publisher host is unreachable.
+  const coverSource = book.coverImage ?? book.coverUrl ?? undefined;
 
   return (
     <Card className={styles.card}>
       <CardPreview className={styles.preview}>
-        <img className={styles.cover} src={coverSource} alt={`Cover of ${book.name}`} loading="lazy" />
+        {coverSource ? (
+          <img className={styles.cover} src={coverSource} alt={`Cover of ${book.name}`} loading="lazy" />
+        ) : (
+          <Caption1>No cover</Caption1>
+        )}
       </CardPreview>
 
       <CardHeader
         header={<Text weight="semibold">{book.name}</Text>}
-        description={<Caption1>{book.author}</Caption1>}
+        description={
+          <Caption1>
+            {book.author}
+            {book.translator ? ` · tr. ${book.translator}` : ''}
+            {book.publisher ? ` · ${book.publisher}` : ''}
+            {book.publishedOn ? ` · ${book.publishedOn}` : ''}
+            {book.isbn ? ` · ISBN ${book.isbn}` : ''}
+          </Caption1>
+        }
       />
 
-      <div className={styles.footer}>
-        <Link href={book.coverUrl} target="_blank" rel="noreferrer">
-          Original cover
-        </Link>
-      </div>
+      {book.recommendation ? (
+        <div className={styles.footer}>
+          <Caption1>{book.recommendation}</Caption1>
+        </div>
+      ) : null}
+
+      {book.coverUrl ? (
+        <div className={styles.footer}>
+          <Link href={book.coverUrl} target="_blank" rel="noreferrer">
+            Original cover
+          </Link>
+        </div>
+      ) : null}
     </Card>
   );
 }

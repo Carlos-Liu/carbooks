@@ -19,6 +19,11 @@ internal static class CatalogMappings
             book.Id,
             book.Name,
             book.Author,
+            book.Translator,
+            book.Publisher,
+            book.PublishedOn,
+            book.Recommendation,
+            book.Isbn,
             book.CoverUrl,
             dataUriFactory.Create(book.CoverImage, book.CoverImageContentType));
 

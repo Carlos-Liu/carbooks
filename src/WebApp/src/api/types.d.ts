@@ -8,8 +8,14 @@ export interface Book {
     id: string;
     name: string;
     author: string;
+    translator?: string | null;
+    publisher?: string | null;
+    /** ISO date `YYYY-MM-DD`, or null when unknown. */
+    publishedOn?: string | null;
+    recommendation?: string | null;
+    isbn?: string | null;
     /** Absolute URL of the publisher cover artwork. */
-    coverUrl: string;
+    coverUrl?: string | null;
     /** Locally stored cover artwork as a `data:` URI, absent when only the URL is known. */
     coverImage?: string | null;
 }

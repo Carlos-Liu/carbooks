@@ -20,10 +20,28 @@ public sealed class CreateBookDto
     [MaxLength(Consts.MaxBookAuthorLength)]
     public string Author { get; init; } = string.Empty;
 
+    /// <summary>Translator of the book.</summary>
+    [MaxLength(Consts.MaxBookAuthorLength)]
+    public string? Translator { get; init; }
+
+    /// <summary>Publisher name.</summary>
+    [MaxLength(Consts.MaxBookPublisherLength)]
+    public string? Publisher { get; init; }
+
+    /// <summary>Publication date without a time component.</summary>
+    public DateOnly? PublishedOn { get; init; }
+
+    /// <summary>Short recommendation blurb.</summary>
+    [MaxLength(Consts.MaxBookRecommendationLength)]
+    public string? Recommendation { get; init; }
+
+    /// <summary>ISBN of the book.</summary>
+    [MaxLength(Consts.MaxBookIsbnLength)]
+    public string? Isbn { get; init; }
+
     /// <summary>Absolute URL of the publisher cover artwork.</summary>
-    [Required]
     [MaxLength(Consts.MaxCoverUrlLength)]
-    public string CoverUrl { get; init; } = string.Empty;
+    public string? CoverUrl { get; init; }
 
     /// <summary>Optional cover image selected from the caller's local machine.</summary>
     public IFormFile? CoverImage { get; init; }

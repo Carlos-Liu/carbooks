@@ -8,7 +8,7 @@ namespace CarBooks.Domain.Catalog;
 /// An independent book that may belong to zero or more <see cref="Category"/> entries.
 /// </summary>
 /// <remarks>
-/// A cover can be supplied two ways: <see cref="CoverUrl"/> always points at the publisher artwork,
+/// A cover can be supplied two ways: <see cref="CoverUrl"/> may point at publisher artwork,
 /// while <see cref="CoverImage"/> optionally holds a locally stored copy that keeps the catalog
 /// renderable when the external host is unreachable.
 /// </remarks>
@@ -16,12 +16,26 @@ public sealed class Book : Entity
 {
     private readonly List<Category> categories = [];
 
-    public Book(Guid id, string name, string author, string coverUrl)
+    public Book(
+        Guid id,
+        string name,
+        string author,
+        string? coverUrl = null,
+        string? translator = null,
+        string? publisher = null,
+        DateOnly? publishedOn = null,
+        string? recommendation = null,
+        string? isbn = null)
         : base(id)
     {
         Name = Guard.Text(name, nameof(Name));
         Author = Guard.Text(author, nameof(Author));
-        CoverUrl = Guard.AbsoluteUrl(coverUrl, nameof(CoverUrl));
+        CoverUrl = Guard.OptionalAbsoluteUrl(coverUrl, nameof(CoverUrl));
+        Translator = Guard.OptionalText(translator);
+        Publisher = Guard.OptionalText(publisher);
+        PublishedOn = publishedOn;
+        Recommendation = Guard.OptionalText(recommendation);
+        Isbn = Guard.OptionalText(isbn);
     }
 
     private Book()
@@ -36,10 +50,24 @@ public sealed class Book : Entity
     [MaxLength(Consts.MaxBookAuthorLength)]
     public string Author { get; private set; } = string.Empty;
 
+    [MaxLength(Consts.MaxBookAuthorLength)]
+    public string? Translator { get; private set; }
+
+    [MaxLength(Consts.MaxBookPublisherLength)]
+    public string? Publisher { get; private set; }
+
+    /// <summary>Publication date without a time component.</summary>
+    public DateOnly? PublishedOn { get; private set; }
+
+    [MaxLength(Consts.MaxBookRecommendationLength)]
+    public string? Recommendation { get; private set; }
+
+    [MaxLength(Consts.MaxBookIsbnLength)]
+    public string? Isbn { get; private set; }
+
     /// <summary>Absolute URL of the cover artwork hosted outside the application.</summary>
-    [Required]
     [MaxLength(Consts.MaxCoverUrlLength)]
-    public string CoverUrl { get; private set; } = string.Empty;
+    public string? CoverUrl { get; private set; }
 
     /// <summary>Locally stored cover artwork, or <see langword="null"/> when only the URL is known.</summary>
     public byte[]? CoverImage { get; private set; }

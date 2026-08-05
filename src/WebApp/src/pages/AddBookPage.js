@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { Body1, Button, Field, Input, MessageBar, MessageBarBody, MessageBarTitle, Title2, makeStyles, tokens, } from '@fluentui/react-components';
+import { Body1, Button, Field, Input, MessageBar, MessageBarBody, MessageBarTitle, Textarea, Title2, makeStyles, tokens, } from '@fluentui/react-components';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -36,6 +36,11 @@ export function AddBookPage() {
     const navigate = useNavigate();
     const [name, setName] = useState('');
     const [author, setAuthor] = useState('');
+    const [translator, setTranslator] = useState('');
+    const [publisher, setPublisher] = useState('');
+    const [publishedOn, setPublishedOn] = useState('');
+    const [recommendation, setRecommendation] = useState('');
+    const [isbn, setIsbn] = useState('');
     const [coverUrl, setCoverUrl] = useState('');
     const [coverImage, setCoverImage] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
@@ -65,7 +70,12 @@ export function AddBookPage() {
         mutation.mutate({
             name: name.trim(),
             author: author.trim(),
-            coverUrl: coverUrl.trim(),
+            translator: translator.trim() || undefined,
+            publisher: publisher.trim() || undefined,
+            publishedOn: publishedOn || undefined,
+            recommendation: recommendation.trim() || undefined,
+            isbn: isbn.trim() || undefined,
+            coverUrl: coverUrl.trim() || undefined,
             coverImage,
         });
     };
@@ -74,5 +84,5 @@ export function AddBookPage() {
         : mutation.error
             ? 'Could not create the book.'
             : null;
-    return (_jsxs("section", { children: [_jsxs("div", { className: styles.header, children: [_jsx(AppLink, { to: "/", children: "Back to categories" }), _jsx(Title2, { children: "Add a book" }), _jsx(Body1, { children: "Create a catalog entry and optionally upload a local cover image." })] }), _jsxs("form", { className: styles.form, onSubmit: onSubmit, children: [_jsx(Field, { label: "Name", required: true, children: _jsx(Input, { value: name, onChange: (_, data) => setName(data.value), maxLength: 64, required: true }) }), _jsx(Field, { label: "Author", required: true, children: _jsx(Input, { value: author, onChange: (_, data) => setAuthor(data.value), maxLength: 64, required: true }) }), _jsx(Field, { label: "Cover URL", required: true, hint: "Absolute http(s) URL of the publisher artwork.", children: _jsx(Input, { type: "url", value: coverUrl, onChange: (_, data) => setCoverUrl(data.value), maxLength: 2048, required: true }) }), _jsx(Field, { label: "Cover image", hint: "Optional. JPEG, PNG, GIF, WebP or SVG, up to 5 MB.", children: _jsx("input", { type: "file", accept: "image/jpeg,image/png,image/gif,image/webp,image/svg+xml", onChange: (event) => onCoverImageChange(event.target.files) }) }), previewUrl ? (_jsx("img", { className: styles.preview, src: previewUrl, alt: "Selected cover preview" })) : null, errorMessage ? (_jsx(MessageBar, { intent: "error", children: _jsxs(MessageBarBody, { children: [_jsx(MessageBarTitle, { children: "Could not add the book" }), errorMessage] }) })) : null, _jsxs("div", { className: styles.actions, children: [_jsx(Button, { type: "submit", appearance: "primary", disabled: mutation.isPending, children: mutation.isPending ? 'Saving…' : 'Add book' }), _jsx(Button, { type: "button", appearance: "secondary", onClick: () => void navigate('/'), children: "Cancel" })] })] })] }));
+    return (_jsxs("section", { children: [_jsxs("div", { className: styles.header, children: [_jsx(AppLink, { to: "/", children: "Back to categories" }), _jsx(Title2, { children: "Add a book" }), _jsx(Body1, { children: "Create a catalog entry and optionally upload a local cover image." })] }), _jsxs("form", { className: styles.form, onSubmit: onSubmit, children: [_jsx(Field, { label: "Name", required: true, children: _jsx(Input, { value: name, onChange: (_, data) => setName(data.value), maxLength: 64, required: true }) }), _jsx(Field, { label: "Author", required: true, children: _jsx(Input, { value: author, onChange: (_, data) => setAuthor(data.value), maxLength: 64, required: true }) }), _jsx(Field, { label: "Translator", children: _jsx(Input, { value: translator, onChange: (_, data) => setTranslator(data.value), maxLength: 64 }) }), _jsx(Field, { label: "Publisher", children: _jsx(Input, { value: publisher, onChange: (_, data) => setPublisher(data.value), maxLength: 32 }) }), _jsx(Field, { label: "Published on", hint: "Date only, no time.", children: _jsx(Input, { type: "date", value: publishedOn, onChange: (_, data) => setPublishedOn(data.value) }) }), _jsx(Field, { label: "Recommendation", children: _jsx(Textarea, { value: recommendation, onChange: (_, data) => setRecommendation(data.value), maxLength: 1024, rows: 4 }) }), _jsx(Field, { label: "ISBN", hint: "Optional. Up to 17 characters (ISBN-10/13, hyphens allowed).", children: _jsx(Input, { value: isbn, onChange: (_, data) => setIsbn(data.value), maxLength: 17 }) }), _jsx(Field, { label: "Cover URL", hint: "Optional absolute http(s) URL of the publisher artwork.", children: _jsx(Input, { type: "url", value: coverUrl, onChange: (_, data) => setCoverUrl(data.value), maxLength: 2048 }) }), _jsx(Field, { label: "Cover image", hint: "Optional. JPEG, PNG, GIF, WebP or SVG, up to 5 MB.", children: _jsx("input", { type: "file", accept: "image/jpeg,image/png,image/gif,image/webp,image/svg+xml", onChange: (event) => onCoverImageChange(event.target.files) }) }), previewUrl ? (_jsx("img", { className: styles.preview, src: previewUrl, alt: "Selected cover preview" })) : null, errorMessage ? (_jsx(MessageBar, { intent: "error", children: _jsxs(MessageBarBody, { children: [_jsx(MessageBarTitle, { children: "Could not add the book" }), errorMessage] }) })) : null, _jsxs("div", { className: styles.actions, children: [_jsx(Button, { type: "submit", appearance: "primary", disabled: mutation.isPending, children: mutation.isPending ? 'Saving…' : 'Add book' }), _jsx(Button, { type: "button", appearance: "secondary", onClick: () => void navigate('/'), children: "Cancel" })] })] })] }));
 }

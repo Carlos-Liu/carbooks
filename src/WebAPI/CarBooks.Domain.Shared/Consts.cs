@@ -12,6 +12,12 @@ public static class Consts
 
     public const int MaxBookAuthorLength = 64;
 
+    public const int MaxBookPublisherLength = 32;
+
+    public const int MaxBookRecommendationLength = 1024;
+
+    public const int MaxBookIsbnLength = 32;
+
     public const int MaxCoverUrlLength = 2048;
 
     public const int MaxContentTypeLength = 128;

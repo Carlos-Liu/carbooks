@@ -19,12 +19,26 @@ public sealed class BookManager
     public async Task<Book> AddBookAsync(
         string name,
         string author,
-        string coverUrl,
+        string? coverUrl,
+        string? translator,
+        string? publisher,
+        DateOnly? publishedOn,
+        string? recommendation,
+        string? isbn,
         byte[]? coverImage,
         string? coverImageContentType,
         CancellationToken cancellationToken)
     {
-        var book = new Book(Entity.NewId(), name, author, coverUrl);
+        var book = new Book(
+            Entity.NewId(),
+            name,
+            author,
+            coverUrl,
+            translator,
+            publisher,
+            publishedOn,
+            recommendation,
+            isbn);
 
         if (coverImage is { Length: > 0 })
         {
