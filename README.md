@@ -69,3 +69,19 @@ docker compose up --build
 ```
 
 See `src/compose` for environment variables (`POSTGRES_*`, ports, etc.).
+
+## Tests
+
+**Backend (xUnit)**
+
+```bash
+dotnet test src/WebAPI/CarBooks.Domain.Tests/CarBooks.Domain.Tests.csproj
+dotnet test src/WebAPI/CarBooks.Application.Tests/CarBooks.Application.Tests.csproj
+```
+
+**Frontend (Vitest)**
+
+```bash
+cd src/WebApp
+npm test
+```

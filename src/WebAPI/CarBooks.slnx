@@ -19,4 +19,8 @@
   <Folder Name="/Presentation/">
     <Project Path="CarBooks.WebAPI/CarBooks.WebAPI.csproj" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="CarBooks.Domain.Tests/CarBooks.Domain.Tests.csproj" />
+    <Project Path="CarBooks.Application.Tests/CarBooks.Application.Tests.csproj" />
+  </Folder>
 </Solution>

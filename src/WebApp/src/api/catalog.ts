@@ -29,7 +29,8 @@ export interface CreateBookInput {
   categoryIds?: string[];
 }
 
-export async function createBook(input: CreateBookInput, signal?: AbortSignal): Promise<Book> {
+/** Builds the multipart body for create-book. Exported for unit tests. */
+export function buildCreateBookFormData(input: CreateBookInput): FormData {
   const formData = new FormData();
   formData.append('name', input.name);
   formData.append('author', input.author);
@@ -66,5 +67,9 @@ export async function createBook(input: CreateBookInput, signal?: AbortSignal): 
     formData.append('categoryIds', categoryId);
   }
 
-  return postForm<Book>('/books', formData, signal);
+  return formData;
+}
+
+export async function createBook(input: CreateBookInput, signal?: AbortSignal): Promise<Book> {
+  return postForm<Book>('/books', buildCreateBookFormData(input), signal);
 }
