@@ -1,0 +1,28 @@
+# Codecov configuration — see https://docs.codecov.com/docs/codecov-yaml
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        target: auto
+
+flag_management:
+  individual_flags:
+    - name: backend
+      paths:
+        - src/WebAPI/
+      carryforward: true
+    - name: frontend
+      paths:
+        - src/WebApp/
+      carryforward: true
+
+ignore:
+  - "**/Migrations/**"
+  - "**/*.Tests/**"
+  - "src/WebApp/**/*.test.ts"
+  - "src/WebApp/src/main.tsx"
+  - "src/WebApp/src/vite-env.d.ts"

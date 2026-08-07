@@ -1,5 +1,5 @@
 # Build and unit-test backend (.NET) and frontend (Vitest) in parallel,
-# and publish code-coverage reports as workflow artifacts.
+# upload coverage to Codecov, and keep reports as workflow artifacts.
 
 name: CI
 
@@ -35,7 +35,15 @@ jobs:
         --collect:"XPlat Code Coverage"
         --results-directory ./TestResults
         --settings coverlet.runsettings
-    - name: Upload backend coverage
+    - name: Upload backend coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: src/WebAPI/TestResults/**/coverage.cobertura.xml
+        flags: backend
+        name: backend
+        fail_ci_if_error: true
+    - name: Upload backend coverage artifact
       uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -61,12 +69,18 @@ jobs:
       run: npm ci
     - name: Frontend unit test with coverage
       run: npm run test:coverage
-    - name: Upload frontend coverage
+    - name: Upload frontend coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: src/WebApp/coverage/lcov.info
+        flags: frontend
+        name: frontend
+        fail_ci_if_error: true
+    - name: Upload frontend coverage artifact
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: frontend-coverage
-        path: |
-          src/WebApp/coverage/lcov.info
-          src/WebApp/coverage/index.html
+        path: src/WebApp/coverage
         if-no-files-found: warn

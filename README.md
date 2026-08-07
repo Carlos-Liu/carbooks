@@ -102,4 +102,17 @@ cd src/WebApp
 npm run test:coverage
 ```
 
-CI uploads `backend-coverage` and `frontend-coverage` artifacts from the GitHub Actions run.
+CI uploads `backend-coverage` and `frontend-coverage` artifacts, and also sends reports to [Codecov](https://codecov.io) (PR comments + dashboard).
+
+### Codecov setup (one-time)
+
+1. Sign in at [codecov.io](https://codecov.io) with GitHub and add this repository.
+2. Copy the upload token from Codecov → repo **Settings**.
+3. In GitHub → repo **Settings** → **Secrets and variables** → **Actions**, create secret `CODECOV_TOKEN` with that value.
+4. Push to `master` (or open a PR). After the CI run finishes, open the Codecov dashboard or the Codecov bot comment on the PR to browse coverage by file.
+
+Optional README badge (replace `OWNER/REPO`):
+
+```markdown
+[![codecov](https://codecov.io/gh/OWNER/REPO/graph/badge.svg)](https://codecov.io/gh/OWNER/REPO)
+```
