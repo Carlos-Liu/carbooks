@@ -79,9 +79,27 @@ dotnet test src/WebAPI/CarBooks.Domain.Tests/CarBooks.Domain.Tests.csproj
 dotnet test src/WebAPI/CarBooks.Application.Tests/CarBooks.Application.Tests.csproj
 ```
 
+Coverage (Cobertura under `src/WebAPI/TestResults`):
+
+```bash
+dotnet test src/WebAPI/CarBooks.slnx \
+  --collect:"XPlat Code Coverage" \
+  --results-directory src/WebAPI/TestResults \
+  --settings src/WebAPI/coverlet.runsettings
+```
+
 **Frontend (Vitest)**
 
 ```bash
 cd src/WebApp
 npm test
 ```
+
+Coverage (text summary + `coverage/index.html`):
+
+```bash
+cd src/WebApp
+npm run test:coverage
+```
+
+CI uploads `backend-coverage` and `frontend-coverage` artifacts from the GitHub Actions run.

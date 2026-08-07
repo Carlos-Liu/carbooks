@@ -1,7 +1,7 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+# Build and unit-test backend (.NET) and frontend (Vitest) in parallel,
+# and publish code-coverage reports as workflow artifacts.
 
-name: .NET
+name: CI
 
 on:
   push:
@@ -10,19 +10,63 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
-
+  backend:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: src/WebAPI
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        # Matches TargetFramework in Directory.Build.props (net10.0).
+        dotnet-version: 10.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore CarBooks.slnx
     - name: Build
-      run: dotnet build ././src/webapi/carbooks.slnx --no-restore
-    - name: Backend unit test
-      run: dotnet test ././src/webapi/carbooks.slnx
+      run: dotnet build CarBooks.slnx --no-restore --configuration Release
+    - name: Backend unit test with coverage
+      run: >
+        dotnet test CarBooks.slnx
+        --no-build
+        --configuration Release
+        --verbosity normal
+        --collect:"XPlat Code Coverage"
+        --results-directory ./TestResults
+        --settings coverlet.runsettings
+    - name: Upload backend coverage
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: backend-coverage
+        path: src/WebAPI/TestResults/**/coverage.cobertura.xml
+        if-no-files-found: warn
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/WebApp
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        # Matches engines.node in package.json (>=22.22.0).
+        node-version: 22
+        cache: npm
+        cache-dependency-path: src/WebApp/package-lock.json
+    - name: Install dependencies
+      run: npm ci
+    - name: Frontend unit test with coverage
+      run: npm run test:coverage
+    - name: Upload frontend coverage
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: frontend-coverage
+        path: |
+          src/WebApp/coverage/lcov.info
+          src/WebApp/coverage/index.html
+        if-no-files-found: warn

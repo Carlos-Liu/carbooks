@@ -13,6 +13,7 @@ TestResults/
 node_modules/
 dist/
 .vite/
+coverage/
 *.tsbuildinfo
 
 ## Environment / secrets
