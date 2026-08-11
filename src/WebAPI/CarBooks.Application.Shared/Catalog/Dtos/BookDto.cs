@@ -16,6 +16,7 @@ namespace CarBooks.Application.Shared.Catalog.Dtos;
 /// Locally stored cover artwork encoded as a <c>data:</c> URI, or <see langword="null"/> when no
 /// local image is stored.
 /// </param>
+/// <param name="Tags">Tags assigned to the book (may be empty).</param>
 public sealed record BookDto(
     Guid Id,
     string Name,
@@ -26,4 +27,5 @@ public sealed record BookDto(
     string? Recommendation,
     string? Isbn,
     string? CoverUrl,
-    string? CoverImage);
+    string? CoverImage,
+    IReadOnlyList<TagDto> Tags);

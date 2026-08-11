@@ -17,7 +17,10 @@ internal static class Mappings
     public static TagDto ToDto(this Tag tag) =>
         new(tag.Id, tag.Name);
 
-    public static BookDto ToDto(this Book book, IDataUriFactory dataUriFactory) =>
+    public static BookDto ToDto(
+        this Book book,
+        IDataUriFactory dataUriFactory,
+        IReadOnlyList<Tag>? tags = null) =>
         new(
             book.Id,
             book.Name,
@@ -28,8 +31,16 @@ internal static class Mappings
             book.Recommendation,
             book.Isbn,
             book.CoverUrl,
-            dataUriFactory.Create(book.CoverImage, book.CoverImageContentType));
+            dataUriFactory.Create(book.CoverImage, book.CoverImageContentType),
+            (tags ?? []).Select(tag => tag.ToDto()).ToList());
 
-    public static IReadOnlyList<BookDto> ToDtos(this IEnumerable<Book> books, IDataUriFactory dataUriFactory) =>
-        books.Select(book => book.ToDto(dataUriFactory)).ToList();
+    public static IReadOnlyList<BookDto> ToDtos(
+        this IEnumerable<Book> books,
+        IDataUriFactory dataUriFactory,
+        IReadOnlyDictionary<Guid, IReadOnlyList<Tag>> tagsByBookId) =>
+        books
+            .Select(book => book.ToDto(
+                dataUriFactory,
+                tagsByBookId.GetValueOrDefault(book.Id)))
+            .ToList();
 }

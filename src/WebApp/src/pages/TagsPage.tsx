@@ -1,9 +1,10 @@
 import { Body1, Caption1, Title2, makeStyles, tokens } from '@fluentui/react-components';
 import { useQuery } from '@tanstack/react-query';
 
-import { categoriesQuery } from '../api/catalog';
+import { tagsQuery } from '../api/catalog';
 import { AppLink } from '../components/AppLink';
 import { AsyncBoundary } from '../components/AsyncBoundary';
+import { TagChip } from '../components/TagChip';
 
 const useStyles = makeStyles({
   intro: {
@@ -28,50 +29,48 @@ const useStyles = makeStyles({
   },
   list: {
     display: 'flex',
-    flexDirection: 'column',
-    rowGap: tokens.spacingVerticalL,
+    flexWrap: 'wrap',
+    gap: tokens.spacingHorizontalS,
     listStyleType: 'none',
     margin: '0',
     padding: '0',
   },
-  item: {
-    display: 'flex',
-    flexDirection: 'column',
-    rowGap: tokens.spacingVerticalXXS,
-    fontSize: tokens.fontSizeBase500,
+  empty: {
+    color: tokens.colorNeutralForeground3,
   },
 });
 
-export function HomePage() {
+export function TagsPage() {
   const styles = useStyles();
-  const { data, isPending, error, refetch } = useQuery(categoriesQuery());
+  const { data, isPending, error, refetch } = useQuery(tagsQuery());
 
   return (
     <section>
       <div className={styles.intro}>
         <div className={styles.introRow}>
           <div>
-            <Title2>Browse by category</Title2>
-            <Body1>Choose a category to see the books it contains.</Body1>
+            <Title2>All tags</Title2>
+            <Body1>Labels that can be shared across books in the catalog.</Body1>
           </div>
           <div className={styles.nav}>
-            <AppLink to="/tags">All tags</AppLink>
+            <AppLink to="/">Categories</AppLink>
             <AppLink to="/books/new">Add a book</AppLink>
           </div>
         </div>
       </div>
 
       <AsyncBoundary isPending={isPending} error={error} onRetry={() => void refetch()}>
-        <ul className={styles.list}>
-          {data?.map((category) => (
-            <li key={category.id} className={styles.item}>
-              <AppLink to={`/categories/${category.id}`}>{category.name}</AppLink>
-              <Caption1>
-                {category.bookCount} {category.bookCount === 1 ? 'book' : 'books'}
-              </Caption1>
-            </li>
-          ))}
-        </ul>
+        {data && data.length > 0 ? (
+          <ul className={styles.list} aria-label="All tags">
+            {data.map((tag) => (
+              <li key={tag.id}>
+                <TagChip name={tag.name} id={tag.id} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Caption1 className={styles.empty}>No tags yet.</Caption1>
+        )}
       </AsyncBoundary>
     </section>
   );

@@ -11,6 +11,7 @@ import {
 } from '@fluentui/react-components';
 
 import type { Book } from '../api/types';
+import { TagChip } from './TagChip';
 
 const useStyles = makeStyles({
   card: {
@@ -31,6 +32,12 @@ const useStyles = makeStyles({
   footer: {
     ...shorthands.padding('0', tokens.spacingHorizontalM, tokens.spacingVerticalM),
   },
+  tags: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: tokens.spacingHorizontalXS,
+    ...shorthands.padding('0', tokens.spacingHorizontalM, tokens.spacingVerticalM),
+  },
 });
 
 interface BookCardProps {
@@ -42,6 +49,7 @@ export function BookCard({ book }: BookCardProps) {
 
   // Prefer the locally stored cover when the publisher host is unreachable.
   const coverSource = book.coverImage ?? book.coverUrl ?? undefined;
+  const tags = book.tags ?? [];
 
   return (
     <Card className={styles.card}>
@@ -65,6 +73,14 @@ export function BookCard({ book }: BookCardProps) {
           </Caption1>
         }
       />
+
+      {tags.length > 0 ? (
+        <div className={styles.tags} aria-label={`Tags for ${book.name}`}>
+          {tags.map((tag) => (
+            <TagChip key={tag.id} id={tag.id} name={tag.name} />
+          ))}
+        </div>
+      ) : null}
 
       {book.recommendation ? (
         <div className={styles.footer}>

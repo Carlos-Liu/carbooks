@@ -31,5 +31,9 @@ public sealed class RepositoryModule : Autofac.Module
         builder.RegisterType<EfBookTagsRepository>()
             .As<IBookTagsRepository>()
             .InstancePerLifetimeScope();
+
+        builder.RegisterType<EfUnitOfWork>()
+            .As<IUnitOfWork>()
+            .InstancePerLifetimeScope();
     }
 }

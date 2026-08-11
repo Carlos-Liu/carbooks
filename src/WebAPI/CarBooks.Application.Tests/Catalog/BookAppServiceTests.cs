@@ -17,6 +17,7 @@ public sealed class BookAppServiceTests
     private readonly ICategoryBooksRepository categoryBooksRepository = Substitute.For<ICategoryBooksRepository>();
     private readonly ITagRepository tagRepository = Substitute.For<ITagRepository>();
     private readonly IBookTagsRepository bookTagsRepository = Substitute.For<IBookTagsRepository>();
+    private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly IDataUriFactory dataUriFactory = Substitute.For<IDataUriFactory>();
     private readonly BookAppService bookAppService;
 
@@ -27,12 +28,16 @@ public sealed class BookAppServiceTests
             categoryRepository,
             categoryBooksRepository,
             tagRepository,
-            bookTagsRepository);
+            bookTagsRepository,
+            unitOfWork);
         var catalogManager = new CatalogManager(categoryRepository, bookRepository);
         dataUriFactory.Create(Arg.Any<byte[]?>(), Arg.Any<string?>()).Returns((string?)null);
+        bookTagsRepository.ListTagsByBookIdsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+            .Returns(new Dictionary<Guid, IReadOnlyList<Tag>>());
         bookAppService = new BookAppService(
             catalogManager,
             bookManager,
+            bookTagsRepository,
             dataUriFactory,
             NullLogger<BookAppService>.Instance);
     }
@@ -158,14 +163,21 @@ public sealed class BookAppServiceTests
     {
         // Arrange
         var categoryId = Guid.Parse("11111111-1111-4111-8111-111111110001");
+        var bookId = Guid.Parse("22222222-2222-4222-8222-222222220001");
         var category = new Category(categoryId, "Category 1");
         var books = new List<Book>
         {
-            new(Guid.Parse("22222222-2222-4222-8222-222222220001"), "First Book", "A. J. Baime"),
+            new(bookId, "First Book", "A. J. Baime"),
             new(Guid.Parse("22222222-2222-4222-8222-222222220002"), "Second Book", "John Smith"),
         };
+        var racingTag = new Tag(Guid.Parse("33333333-3333-4333-8333-333333330001"), "Racing");
         categoryRepository.FindAsync(categoryId, Arg.Any<CancellationToken>()).Returns(category);
         bookRepository.ListByCategoryAsync(categoryId, Arg.Any<CancellationToken>()).Returns(books);
+        bookTagsRepository.ListTagsByBookIdsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+            .Returns(new Dictionary<Guid, IReadOnlyList<Tag>>
+            {
+                [bookId] = [racingTag],
+            });
 
         // Act
         var result = await bookAppService.GetBooksByCategoryIdAsync(categoryId, CancellationToken.None);
@@ -175,6 +187,9 @@ public sealed class BookAppServiceTests
         Assert.Equal(2, result.Category.BookCount);
         Assert.Equal(2, result.Books.Count);
         Assert.Equal("First Book", result.Books[0].Name);
+        Assert.Single(result.Books[0].Tags);
+        Assert.Equal("Racing", result.Books[0].Tags[0].Name);
         Assert.Equal("Second Book", result.Books[1].Name);
+        Assert.Empty(result.Books[1].Tags);
     }
 }

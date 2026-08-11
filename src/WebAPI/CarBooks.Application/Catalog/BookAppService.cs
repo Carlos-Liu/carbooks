@@ -2,6 +2,7 @@ using CarBooks.Application.Catalog.Mapping;
 using CarBooks.Application.Shared.Catalog;
 using CarBooks.Application.Shared.Catalog.Dtos;
 using CarBooks.Domain.Catalog;
+using CarBooks.Domain.Repositories;
 using CarBooks.Domain.Shared;
 using CarBooks.Domain.Shared.Errors;
 using CarBooks.Infrastructure.Media;
@@ -23,17 +24,20 @@ internal sealed class BookAppService : IBookAppService
 
     private readonly CatalogManager catalogManager;
     private readonly BookManager bookManager;
+    private readonly IBookTagsRepository bookTagsRepository;
     private readonly IDataUriFactory dataUriFactory;
     private readonly ILogger<BookAppService> logger;
 
     public BookAppService(
         CatalogManager catalogManager,
         BookManager bookManager,
+        IBookTagsRepository bookTagsRepository,
         IDataUriFactory dataUriFactory,
         ILogger<BookAppService> logger)
     {
         this.catalogManager = catalogManager;
         this.bookManager = bookManager;
+        this.bookTagsRepository = bookTagsRepository;
         this.dataUriFactory = dataUriFactory;
         this.logger = logger;
     }
@@ -43,6 +47,9 @@ internal sealed class BookAppService : IBookAppService
         CancellationToken cancellationToken)
     {
         var result = await catalogManager.GetCategoryBooksAsync(categoryId, cancellationToken);
+        var tagsByBookId = await bookTagsRepository.ListTagsByBookIdsAsync(
+            result.Books.Select(book => book.Id),
+            cancellationToken);
 
         logger.LogInformation(
             "Returning {BookCount} books for category {CategoryId}.",
@@ -51,7 +58,7 @@ internal sealed class BookAppService : IBookAppService
 
         return new CategoryBooksDto(
             result.Category.ToDto(result.Books.Count),
-            result.Books.ToDtos(dataUriFactory));
+            result.Books.ToDtos(dataUriFactory, tagsByBookId));
     }
 
     public async Task<BookDto> CreateBookAsync(CreateBookDto request, CancellationToken cancellationToken)
@@ -75,9 +82,12 @@ internal sealed class BookAppService : IBookAppService
             request.TagIds,
             cancellationToken);
 
+        var tagsByBookId = await bookTagsRepository.ListTagsByBookIdsAsync([book.Id], cancellationToken);
+        var tags = tagsByBookId.GetValueOrDefault(book.Id);
+
         logger.LogInformation("Created book {BookId} ({BookName}).", book.Id, book.Name);
 
-        return book.ToDto(dataUriFactory);
+        return book.ToDto(dataUriFactory, tags);
     }
 
     private static async Task<(byte[]? Content, string? ContentType)> ReadCoverImageAsync(

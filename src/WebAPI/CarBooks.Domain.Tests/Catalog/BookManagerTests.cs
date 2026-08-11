@@ -11,6 +11,7 @@ public sealed class BookManagerTests
     private readonly ICategoryBooksRepository categoryBooksRepository = Substitute.For<ICategoryBooksRepository>();
     private readonly ITagRepository tagRepository = Substitute.For<ITagRepository>();
     private readonly IBookTagsRepository bookTagsRepository = Substitute.For<IBookTagsRepository>();
+    private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly BookManager bookManager;
 
     public BookManagerTests()
@@ -20,13 +21,16 @@ public sealed class BookManagerTests
             categoryRepository,
             categoryBooksRepository,
             tagRepository,
-            bookTagsRepository);
+            bookTagsRepository,
+            unitOfWork);
     }
 
     [Fact]
     public async Task AddBookAsync_NoCategoriesOrTags_PersistsBookOnly()
     {
-        // Arrange & Act
+        // Arrange
+
+        // Act
         var book = await bookManager.AddBookAsync(
             "Go Like Hell",
             "A. J. Baime",
@@ -49,6 +53,7 @@ public sealed class BookManagerTests
             .AddRangeAsync(Arg.Any<IEnumerable<CategoryBooks>>(), Arg.Any<CancellationToken>());
         await bookTagsRepository.DidNotReceive()
             .AddRangeAsync(Arg.Any<IEnumerable<BookTags>>(), Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -72,12 +77,15 @@ public sealed class BookManagerTests
 
         // Assert
         await Assert.ThrowsAsync<DomainValidationException>(act);
+        await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task AddBookAsync_CoverImageWithContentType_SetsCoverImage()
     {
-        // Arrange & Act
+        // Arrange
+
+        // Act
         var book = await bookManager.AddBookAsync(
             "Go Like Hell",
             "A. J. Baime",
@@ -96,6 +104,7 @@ public sealed class BookManagerTests
         // Assert
         Assert.True(book.HasCoverImage);
         Assert.Equal("image/png", book.CoverImageContentType);
+        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -129,6 +138,7 @@ public sealed class BookManagerTests
                 && links.Single().CategoryId == categoryId
                 && links.Single().BookId == book.Id),
             Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -156,6 +166,7 @@ public sealed class BookManagerTests
 
         // Assert
         await Assert.ThrowsAsync<EntityNotFoundException>(act);
+        await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -189,6 +200,7 @@ public sealed class BookManagerTests
                 && links.Single().TagId == tagId
                 && links.Single().BookId == book.Id),
             Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -216,6 +228,7 @@ public sealed class BookManagerTests
 
         // Assert
         await Assert.ThrowsAsync<EntityNotFoundException>(act);
+        await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

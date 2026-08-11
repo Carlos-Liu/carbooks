@@ -52,17 +52,7 @@ internal static class CatalogSeedData
         var tagHistory = new Tag(Guid.Parse("33333333-3333-4333-8333-333333330002"), "History");
         var tagBiography = new Tag(Guid.Parse("33333333-3333-4333-8333-333333330003"), "Biography");
 
-        IReadOnlyList<BookTags> tagLinks =
-        [
-            new BookTags(tagRacing.Id, book1.Id),
-            new BookTags(tagHistory.Id, book1.Id),
-            new BookTags(tagRacing.Id, book2.Id),
-            new BookTags(tagRacing.Id, book4.Id),
-            new BookTags(tagBiography.Id, book5.Id),
-            new BookTags(tagHistory.Id, book7.Id),
-            new BookTags(tagRacing.Id, book8.Id),
-            new BookTags(tagBiography.Id, book9.Id),
-        ];
+        IReadOnlyList<BookTags> tagLinks = [];
 
         return (
             [category1, category2, category3],

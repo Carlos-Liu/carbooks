@@ -30,6 +30,5 @@ internal sealed class EfBookRepository : IBookRepository
     public async Task AddAsync(Book book, CancellationToken cancellationToken)
     {
         await dbContext.Books.AddAsync(book, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 }

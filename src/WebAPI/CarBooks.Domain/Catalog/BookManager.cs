@@ -13,23 +13,27 @@ public sealed class BookManager
     private readonly ICategoryBooksRepository categoryBooksRepository;
     private readonly ITagRepository tagRepository;
     private readonly IBookTagsRepository bookTagsRepository;
+    private readonly IUnitOfWork unitOfWork;
 
     public BookManager(
         IBookRepository bookRepository,
         ICategoryRepository categoryRepository,
         ICategoryBooksRepository categoryBooksRepository,
         ITagRepository tagRepository,
-        IBookTagsRepository bookTagsRepository)
+        IBookTagsRepository bookTagsRepository,
+        IUnitOfWork unitOfWork)
     {
         this.bookRepository = bookRepository;
         this.categoryRepository = categoryRepository;
         this.categoryBooksRepository = categoryBooksRepository;
         this.tagRepository = tagRepository;
         this.bookTagsRepository = bookTagsRepository;
+        this.unitOfWork = unitOfWork;
     }
 
     /// <summary>
     /// Creates and persists a new book, optionally with a cover image, categories, and tags.
+    /// All inserts are flushed in a single <see cref="IUnitOfWork.SaveChangesAsync"/> call.
     /// </summary>
     public async Task<Book> AddBookAsync(
         string name,
@@ -70,6 +74,7 @@ public sealed class BookManager
         await bookRepository.AddAsync(book, cancellationToken);
         await AssignCategoriesAsync(book.Id, categoryIds, cancellationToken);
         await AssignTagsAsync(book.Id, tagIds, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
         return book;
     }
 

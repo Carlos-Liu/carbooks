@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router';
 import { ApiError } from '../api/client';
 import { categoriesQuery, createBook, tagsQuery } from '../api/catalog';
 import { AppLink } from '../components/AppLink';
+import { TagMultiSelect } from '../components/TagMultiSelect';
 
 const useStyles = makeStyles({
   header: {
@@ -128,11 +129,6 @@ export function AddBookPage() {
     .map((category) => category.name)
     .join(', ');
 
-  const selectedTagNames = (tags ?? [])
-    .filter((tag) => selectedTagIds.includes(tag.id))
-    .map((tag) => tag.name)
-    .join(', ');
-
   const listsPending = categoriesPending || tagsPending;
   const errorMessage =
     mutation.error instanceof ApiError || mutation.error instanceof Error
@@ -231,19 +227,11 @@ export function AddBookPage() {
               </MessageBarBody>
             </MessageBar>
           ) : (
-            <Dropdown
-              multiselect
-              placeholder="Select tags"
-              selectedOptions={selectedTagIds}
-              value={selectedTagNames}
-              onOptionSelect={(_, data) => setSelectedTagIds(data.selectedOptions)}
-            >
-              {(tags ?? []).map((tag) => (
-                <Option key={tag.id} value={tag.id} text={tag.name}>
-                  {tag.name}
-                </Option>
-              ))}
-            </Dropdown>
+            <TagMultiSelect
+              tags={tags ?? []}
+              selectedTagIds={selectedTagIds}
+              onSelectedTagIdsChange={setSelectedTagIds}
+            />
           )}
         </Field>
 
