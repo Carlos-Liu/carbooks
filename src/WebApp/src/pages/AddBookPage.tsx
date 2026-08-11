@@ -19,7 +19,7 @@ import { type FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { ApiError } from '../api/client';
-import { categoriesQuery, createBook } from '../api/catalog';
+import { categoriesQuery, createBook, tagsQuery } from '../api/catalog';
 import { AppLink } from '../components/AppLink';
 
 const useStyles = makeStyles({
@@ -59,6 +59,12 @@ export function AddBookPage() {
     error: categoriesError,
   } = useQuery(categoriesQuery());
 
+  const {
+    data: tags,
+    isPending: tagsPending,
+    error: tagsError,
+  } = useQuery(tagsQuery());
+
   const [name, setName] = useState('');
   const [author, setAuthor] = useState('');
   const [translator, setTranslator] = useState('');
@@ -70,6 +76,7 @@ export function AddBookPage() {
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
 
   useEffect(() => {
     return () => {
@@ -83,6 +90,7 @@ export function AddBookPage() {
     mutationFn: (input: Parameters<typeof createBook>[0]) => createBook(input),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['categories'] });
+      await queryClient.invalidateQueries({ queryKey: ['tags'] });
       void navigate('/');
     },
   });
@@ -111,6 +119,7 @@ export function AddBookPage() {
       coverUrl: coverUrl.trim() || undefined,
       coverImage,
       categoryIds: selectedCategoryIds,
+      tagIds: selectedTagIds,
     });
   };
 
@@ -119,6 +128,12 @@ export function AddBookPage() {
     .map((category) => category.name)
     .join(', ');
 
+  const selectedTagNames = (tags ?? [])
+    .filter((tag) => selectedTagIds.includes(tag.id))
+    .map((tag) => tag.name)
+    .join(', ');
+
+  const listsPending = categoriesPending || tagsPending;
   const errorMessage =
     mutation.error instanceof ApiError || mutation.error instanceof Error
       ? mutation.error.message
@@ -131,7 +146,7 @@ export function AddBookPage() {
       <div className={styles.header}>
         <AppLink to="/">Back to categories</AppLink>
         <Title2>Add a book</Title2>
-        <Body1>Create a catalog entry and optionally assign categories and a cover image.</Body1>
+        <Body1>Create a catalog entry and optionally assign categories, tags, and a cover image.</Body1>
       </div>
 
       <form className={styles.form} onSubmit={onSubmit}>
@@ -202,6 +217,36 @@ export function AddBookPage() {
           )}
         </Field>
 
+        <Field
+          label="Tags"
+          hint="Optional. Select zero or more tags. Names are shown; IDs are sent to the API."
+        >
+          {tagsPending ? (
+            <Spinner size="tiny" label="Loading tags…" />
+          ) : tagsError ? (
+            <MessageBar intent="error">
+              <MessageBarBody>
+                <MessageBarTitle>Could not load tags</MessageBarTitle>
+                {tagsError instanceof Error ? tagsError.message : 'Unexpected error.'}
+              </MessageBarBody>
+            </MessageBar>
+          ) : (
+            <Dropdown
+              multiselect
+              placeholder="Select tags"
+              selectedOptions={selectedTagIds}
+              value={selectedTagNames}
+              onOptionSelect={(_, data) => setSelectedTagIds(data.selectedOptions)}
+            >
+              {(tags ?? []).map((tag) => (
+                <Option key={tag.id} value={tag.id} text={tag.name}>
+                  {tag.name}
+                </Option>
+              ))}
+            </Dropdown>
+          )}
+        </Field>
+
         <Field label="Cover URL" hint="Optional absolute http(s) URL of the publisher artwork.">
           <Input
             type="url"
@@ -233,7 +278,7 @@ export function AddBookPage() {
         ) : null}
 
         <div className={styles.actions}>
-          <Button type="submit" appearance="primary" disabled={mutation.isPending || categoriesPending}>
+          <Button type="submit" appearance="primary" disabled={mutation.isPending || listsPending}>
             {mutation.isPending ? 'Saving…' : 'Add book'}
           </Button>
           <Button type="button" appearance="secondary" onClick={() => void navigate('/')}>

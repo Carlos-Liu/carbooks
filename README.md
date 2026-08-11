@@ -114,5 +114,5 @@ CI uploads `backend-coverage` and `frontend-coverage` artifacts, and also sends 
 Optional README badge (replace `OWNER/REPO`):
 
 ```markdown
-[![codecov](https://codecov.io/gh/OWNER/REPO/graph/badge.svg)](https://codecov.io/gh/OWNER/REPO)
+[![codecov](https://codecov.io/gh/Carlos-Liu/carbooks/graph/badge.svg)](https://app.codecov.io/gh/Carlos-Liu/carbooks)
 ```

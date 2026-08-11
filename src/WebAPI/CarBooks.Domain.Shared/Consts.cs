@@ -8,6 +8,8 @@ public static class Consts
 {
     public const int MaxCategoryNameLength = 64;
 
+    public const int MaxTagNameLength = 32;
+
     public const int MaxBookNameLength = 64;
 
     public const int MaxBookAuthorLength = 64;

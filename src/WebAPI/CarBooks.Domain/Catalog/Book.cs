@@ -5,7 +5,8 @@ using CarBooks.Domain.Shared.Errors;
 namespace CarBooks.Domain.Catalog;
 
 /// <summary>
-/// An independent book that may belong to zero or more categories via <see cref="CategoryBooks"/>.
+/// An independent book that may belong to zero or more categories via <see cref="CategoryBooks"/>
+/// and zero or more tags via <see cref="BookTags"/>.
 /// </summary>
 /// <remarks>
 /// A cover can be supplied two ways: <see cref="CoverUrl"/> may point at publisher artwork,

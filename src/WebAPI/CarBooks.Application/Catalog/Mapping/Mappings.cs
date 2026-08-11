@@ -9,10 +9,13 @@ namespace CarBooks.Application.Catalog.Mapping;
 /// purpose: it keeps the projection reviewable and prevents domain state from leaking into the API
 /// by accident.
 /// </summary>
-internal static class CatalogMappings
+internal static class Mappings
 {
     public static CategoryDto ToDto(this Category category, int bookCount) =>
         new(category.Id, category.Name, bookCount);
+
+    public static TagDto ToDto(this Tag tag) =>
+        new(tag.Id, tag.Name);
 
     public static BookDto ToDto(this Book book, IDataUriFactory dataUriFactory) =>
         new(

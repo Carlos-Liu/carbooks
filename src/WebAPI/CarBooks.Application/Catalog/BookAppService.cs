@@ -72,6 +72,7 @@ internal sealed class BookAppService : IBookAppService
             coverImage,
             contentType,
             request.CategoryIds,
+            request.TagIds,
             cancellationToken);
 
         logger.LogInformation("Created book {BookId} ({BookName}).", book.Id, book.Name);

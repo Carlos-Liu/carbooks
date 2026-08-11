@@ -18,6 +18,7 @@ describe('buildCreateBookFormData', () => {
     expect(formData.get('author')).toBe('A. J. Baime');
     expect(formData.get('translator')).toBeNull();
     expect(formData.getAll('categoryIds')).toEqual([]);
+    expect(formData.getAll('tagIds')).toEqual([]);
   });
 
   it('BuildCreateBookFormData_OptionalTextFieldsProvided_IncludesOptionalFields', () => {
@@ -60,6 +61,21 @@ describe('buildCreateBookFormData', () => {
     expect(formData.getAll('categoryIds')).toEqual(['cat-1', 'cat-2']);
   });
 
+  it('BuildCreateBookFormData_MultipleTagIds_AppendsEachTagId', () => {
+    // Arrange
+    const input = {
+      name: 'Go Like Hell',
+      author: 'A. J. Baime',
+      tagIds: ['tag-1', 'tag-2'],
+    };
+
+    // Act
+    const formData = buildCreateBookFormData(input);
+
+    // Assert
+    expect(formData.getAll('tagIds')).toEqual(['tag-1', 'tag-2']);
+  });
+
   it('BuildCreateBookFormData_CoverImageProvided_AppendsCoverImageFile', () => {
     // Arrange
     const file = new File([new Uint8Array([1, 2, 3])], 'cover.png', { type: 'image/png' });
@@ -85,6 +101,7 @@ describe('buildCreateBookFormData', () => {
       translator: undefined,
       coverImage: null,
       categoryIds: [] as string[],
+      tagIds: [] as string[],
     };
 
     // Act
@@ -94,5 +111,6 @@ describe('buildCreateBookFormData', () => {
     expect(formData.has('translator')).toBe(false);
     expect(formData.has('coverImage')).toBe(false);
     expect(formData.getAll('categoryIds')).toEqual([]);
+    expect(formData.getAll('tagIds')).toEqual([]);
   });
 });

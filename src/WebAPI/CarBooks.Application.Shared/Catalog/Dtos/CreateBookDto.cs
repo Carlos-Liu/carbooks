@@ -46,5 +46,9 @@ public sealed class CreateBookDto
     /// <summary>Optional cover image selected from the caller's local machine.</summary>
     public IFormFile? CoverImage { get; init; }
 
+    /// <summary>Optional category identifiers to assign (zero or more).</summary>
     public IList<Guid> CategoryIds { get; init; } = new List<Guid>();
+
+    /// <summary>Optional tag identifiers to assign (zero or more).</summary>
+    public IList<Guid> TagIds { get; init; } = new List<Guid>();
 }

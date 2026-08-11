@@ -3,15 +3,17 @@ using CarBooks.Domain.Catalog;
 namespace CarBooks.Database.Ef.Seeding;
 
 /// <summary>
-/// The starter catalog: three categories with three books each. Identifiers are fixed so repeated
-/// seeding across environments produces the same rows.
+/// The starter catalog: three categories with three books each, plus shared tags.
+/// Identifiers are fixed so repeated seeding across environments produces the same rows.
 /// </summary>
 internal static class CatalogSeedData
 {
     public static (
         IReadOnlyList<Category> Categories,
         IReadOnlyList<Book> Books,
-        IReadOnlyList<CategoryBooks> Links) CreateCatalog()
+        IReadOnlyList<CategoryBooks> CategoryLinks,
+        IReadOnlyList<Tag> Tags,
+        IReadOnlyList<BookTags> TagLinks) CreateCatalog()
     {
         var category1 = new Category(
             Guid.Parse("11111111-1111-4111-8111-111111110001"),
@@ -33,7 +35,7 @@ internal static class CatalogSeedData
         var book8 = CreateBook("22222222-2222-4222-8222-222222220008", "The Art of the Formula 1 Race Car", "Stuart Codling", "#166534", "#052e16");
         var book9 = CreateBook("22222222-2222-4222-8222-222222220009", "Car Guys vs. Bean Counters", "Bob Lutz", "#166534", "#052e16");
 
-        IReadOnlyList<CategoryBooks> links =
+        IReadOnlyList<CategoryBooks> categoryLinks =
         [
             new CategoryBooks(category1.Id, book1.Id),
             new CategoryBooks(category1.Id, book2.Id),
@@ -46,10 +48,28 @@ internal static class CatalogSeedData
             new CategoryBooks(category3.Id, book9.Id),
         ];
 
+        var tagRacing = new Tag(Guid.Parse("33333333-3333-4333-8333-333333330001"), "Racing");
+        var tagHistory = new Tag(Guid.Parse("33333333-3333-4333-8333-333333330002"), "History");
+        var tagBiography = new Tag(Guid.Parse("33333333-3333-4333-8333-333333330003"), "Biography");
+
+        IReadOnlyList<BookTags> tagLinks =
+        [
+            new BookTags(tagRacing.Id, book1.Id),
+            new BookTags(tagHistory.Id, book1.Id),
+            new BookTags(tagRacing.Id, book2.Id),
+            new BookTags(tagRacing.Id, book4.Id),
+            new BookTags(tagBiography.Id, book5.Id),
+            new BookTags(tagHistory.Id, book7.Id),
+            new BookTags(tagRacing.Id, book8.Id),
+            new BookTags(tagBiography.Id, book9.Id),
+        ];
+
         return (
             [category1, category2, category3],
             [book1, book2, book3, book4, book5, book6, book7, book8, book9],
-            links);
+            categoryLinks,
+            [tagRacing, tagHistory, tagBiography],
+            tagLinks);
     }
 
     private static Book CreateBook(

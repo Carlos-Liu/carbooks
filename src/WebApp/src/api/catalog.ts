@@ -1,12 +1,18 @@
 import { queryOptions } from '@tanstack/react-query';
 
 import { getJson, postForm } from './client';
-import type { Book, Category, CategoryBooks } from './types';
+import type { Book, Category, CategoryBooks, Tag } from './types';
 
 export const categoriesQuery = () =>
   queryOptions({
     queryKey: ['categories'] as const,
     queryFn: ({ signal }) => getJson<Category[]>('/categories', signal),
+  });
+
+export const tagsQuery = () =>
+  queryOptions({
+    queryKey: ['tags'] as const,
+    queryFn: ({ signal }) => getJson<Tag[]>('/tags', signal),
   });
 
 export const categoryBooksQuery = (categoryId: string) =>
@@ -27,6 +33,7 @@ export interface CreateBookInput {
   coverUrl?: string;
   coverImage?: File | null;
   categoryIds?: string[];
+  tagIds?: string[];
 }
 
 /** Builds the multipart body for create-book. Exported for unit tests. */
@@ -65,6 +72,10 @@ export function buildCreateBookFormData(input: CreateBookInput): FormData {
 
   for (const categoryId of input.categoryIds ?? []) {
     formData.append('categoryIds', categoryId);
+  }
+
+  for (const tagId of input.tagIds ?? []) {
+    formData.append('tagIds', tagId);
   }
 
   return formData;

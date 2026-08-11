@@ -15,12 +15,19 @@ public sealed class BookAppServiceTests
     private readonly IBookRepository bookRepository = Substitute.For<IBookRepository>();
     private readonly ICategoryRepository categoryRepository = Substitute.For<ICategoryRepository>();
     private readonly ICategoryBooksRepository categoryBooksRepository = Substitute.For<ICategoryBooksRepository>();
+    private readonly ITagRepository tagRepository = Substitute.For<ITagRepository>();
+    private readonly IBookTagsRepository bookTagsRepository = Substitute.For<IBookTagsRepository>();
     private readonly IDataUriFactory dataUriFactory = Substitute.For<IDataUriFactory>();
     private readonly BookAppService bookAppService;
 
     public BookAppServiceTests()
     {
-        var bookManager = new BookManager(bookRepository, categoryRepository, categoryBooksRepository);
+        var bookManager = new BookManager(
+            bookRepository,
+            categoryRepository,
+            categoryBooksRepository,
+            tagRepository,
+            bookTagsRepository);
         var catalogManager = new CatalogManager(categoryRepository, bookRepository);
         dataUriFactory.Create(Arg.Any<byte[]?>(), Arg.Any<string?>()).Returns((string?)null);
         bookAppService = new BookAppService(

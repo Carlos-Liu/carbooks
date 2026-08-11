@@ -11,19 +11,25 @@ public sealed class BookManager
     private readonly IBookRepository bookRepository;
     private readonly ICategoryRepository categoryRepository;
     private readonly ICategoryBooksRepository categoryBooksRepository;
+    private readonly ITagRepository tagRepository;
+    private readonly IBookTagsRepository bookTagsRepository;
 
     public BookManager(
         IBookRepository bookRepository,
         ICategoryRepository categoryRepository,
-        ICategoryBooksRepository categoryBooksRepository)
+        ICategoryBooksRepository categoryBooksRepository,
+        ITagRepository tagRepository,
+        IBookTagsRepository bookTagsRepository)
     {
         this.bookRepository = bookRepository;
         this.categoryRepository = categoryRepository;
         this.categoryBooksRepository = categoryBooksRepository;
+        this.tagRepository = tagRepository;
+        this.bookTagsRepository = bookTagsRepository;
     }
 
     /// <summary>
-    /// Creates and persists a new book, optionally with a cover image and category assignments.
+    /// Creates and persists a new book, optionally with a cover image, categories, and tags.
     /// </summary>
     public async Task<Book> AddBookAsync(
         string name,
@@ -37,6 +43,7 @@ public sealed class BookManager
         byte[]? coverImage,
         string? coverImageContentType,
         IEnumerable<Guid> categoryIds,
+        IEnumerable<Guid> tagIds,
         CancellationToken cancellationToken)
     {
         var book = new Book(
@@ -61,11 +68,20 @@ public sealed class BookManager
         }
 
         await bookRepository.AddAsync(book, cancellationToken);
+        await AssignCategoriesAsync(book.Id, categoryIds, cancellationToken);
+        await AssignTagsAsync(book.Id, tagIds, cancellationToken);
+        return book;
+    }
 
+    private async Task AssignCategoriesAsync(
+        Guid bookId,
+        IEnumerable<Guid> categoryIds,
+        CancellationToken cancellationToken)
+    {
         var distinctCategoryIds = categoryIds.Distinct().ToList();
         if (distinctCategoryIds.Count == 0)
         {
-            return book;
+            return;
         }
 
         var links = new List<CategoryBooks>(distinctCategoryIds.Count);
@@ -74,10 +90,32 @@ public sealed class BookManager
             _ = await categoryRepository.FindAsync(categoryId, cancellationToken)
                 ?? throw new EntityNotFoundException(nameof(Category), categoryId);
 
-            links.Add(new CategoryBooks(categoryId, book.Id));
+            links.Add(new CategoryBooks(categoryId, bookId));
         }
 
         await categoryBooksRepository.AddRangeAsync(links, cancellationToken);
-        return book;
+    }
+
+    private async Task AssignTagsAsync(
+        Guid bookId,
+        IEnumerable<Guid> tagIds,
+        CancellationToken cancellationToken)
+    {
+        var distinctTagIds = tagIds.Distinct().ToList();
+        if (distinctTagIds.Count == 0)
+        {
+            return;
+        }
+
+        var links = new List<BookTags>(distinctTagIds.Count);
+        foreach (var tagId in distinctTagIds)
+        {
+            _ = await tagRepository.FindAsync(tagId, cancellationToken)
+                ?? throw new EntityNotFoundException(nameof(Tag), tagId);
+
+            links.Add(new BookTags(tagId, bookId));
+        }
+
+        await bookTagsRepository.AddRangeAsync(links, cancellationToken);
     }
 }

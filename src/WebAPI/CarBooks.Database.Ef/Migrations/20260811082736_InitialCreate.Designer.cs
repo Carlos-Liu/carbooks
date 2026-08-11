@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CarBooks.Database.Ef.Migrations
 {
     [DbContext(typeof(CarBooksDbContext))]
-    [Migration("20260805093308_InitialCreate")]
+    [Migration("20260811082736_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -76,6 +76,21 @@ namespace CarBooks.Database.Ef.Migrations
                     b.ToTable("Books", (string)null);
                 });
 
+            modelBuilder.Entity("CarBooks.Domain.Catalog.BookTags", b =>
+                {
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("TagId", "BookId");
+
+                    b.HasIndex("BookId");
+
+                    b.ToTable("BookTags", (string)null);
+                });
+
             modelBuilder.Entity("CarBooks.Domain.Catalog.Category", b =>
                 {
                     b.Property<Guid>("Id")
@@ -105,6 +120,40 @@ namespace CarBooks.Database.Ef.Migrations
                     b.HasIndex("BookId");
 
                     b.ToTable("CategoryBooks", (string)null);
+                });
+
+            modelBuilder.Entity("CarBooks.Domain.Catalog.Tag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Tags", (string)null);
+                });
+
+            modelBuilder.Entity("CarBooks.Domain.Catalog.BookTags", b =>
+                {
+                    b.HasOne("CarBooks.Domain.Catalog.Book", null)
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CarBooks.Domain.Catalog.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CarBooks.Domain.Catalog.CategoryBooks", b =>

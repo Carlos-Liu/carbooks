@@ -9,15 +9,22 @@ public sealed class BookManagerTests
     private readonly IBookRepository bookRepository = Substitute.For<IBookRepository>();
     private readonly ICategoryRepository categoryRepository = Substitute.For<ICategoryRepository>();
     private readonly ICategoryBooksRepository categoryBooksRepository = Substitute.For<ICategoryBooksRepository>();
+    private readonly ITagRepository tagRepository = Substitute.For<ITagRepository>();
+    private readonly IBookTagsRepository bookTagsRepository = Substitute.For<IBookTagsRepository>();
     private readonly BookManager bookManager;
 
     public BookManagerTests()
     {
-        bookManager = new BookManager(bookRepository, categoryRepository, categoryBooksRepository);
+        bookManager = new BookManager(
+            bookRepository,
+            categoryRepository,
+            categoryBooksRepository,
+            tagRepository,
+            bookTagsRepository);
     }
 
     [Fact]
-    public async Task AddBookAsync_NoCategories_PersistsBookOnly()
+    public async Task AddBookAsync_NoCategoriesOrTags_PersistsBookOnly()
     {
         // Arrange & Act
         var book = await bookManager.AddBookAsync(
@@ -32,6 +39,7 @@ public sealed class BookManagerTests
             coverImage: null,
             coverImageContentType: null,
             categoryIds: [],
+            tagIds: [],
             CancellationToken.None);
 
         // Assert
@@ -39,6 +47,8 @@ public sealed class BookManagerTests
         await bookRepository.Received(1).AddAsync(book, Arg.Any<CancellationToken>());
         await categoryBooksRepository.DidNotReceive()
             .AddRangeAsync(Arg.Any<IEnumerable<CategoryBooks>>(), Arg.Any<CancellationToken>());
+        await bookTagsRepository.DidNotReceive()
+            .AddRangeAsync(Arg.Any<IEnumerable<BookTags>>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -57,6 +67,7 @@ public sealed class BookManagerTests
             coverImage: [1, 2, 3],
             coverImageContentType: null,
             categoryIds: [],
+            tagIds: [],
             CancellationToken.None);
 
         // Assert
@@ -79,6 +90,7 @@ public sealed class BookManagerTests
             coverImage: [1, 2, 3],
             coverImageContentType: "image/png",
             categoryIds: [],
+            tagIds: [],
             CancellationToken.None);
 
         // Assert
@@ -107,6 +119,7 @@ public sealed class BookManagerTests
             null,
             null,
             categoryIds: [categoryId, categoryId],
+            tagIds: [],
             CancellationToken.None);
 
         // Assert
@@ -138,6 +151,67 @@ public sealed class BookManagerTests
             null,
             null,
             categoryIds: [missingCategoryId],
+            tagIds: [],
+            CancellationToken.None);
+
+        // Assert
+        await Assert.ThrowsAsync<EntityNotFoundException>(act);
+    }
+
+    [Fact]
+    public async Task AddBookAsync_DuplicateTagIds_CreatesDistinctLinks()
+    {
+        // Arrange
+        var tagId = Guid.Parse("33333333-3333-4333-8333-333333330001");
+        tagRepository.FindAsync(tagId, Arg.Any<CancellationToken>())
+            .Returns(new Tag(tagId, "Racing"));
+
+        // Act
+        var book = await bookManager.AddBookAsync(
+            "Go Like Hell",
+            "A. J. Baime",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            categoryIds: [],
+            tagIds: [tagId, tagId],
+            CancellationToken.None);
+
+        // Assert
+        await bookTagsRepository.Received(1).AddRangeAsync(
+            Arg.Is<IEnumerable<BookTags>>(links =>
+                links.Count() == 1
+                && links.Single().TagId == tagId
+                && links.Single().BookId == book.Id),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task AddBookAsync_MissingTag_ThrowsEntityNotFoundException()
+    {
+        // Arrange
+        var missingTagId = Guid.Parse("33333333-3333-4333-8333-333333330099");
+        tagRepository.FindAsync(missingTagId, Arg.Any<CancellationToken>()).Returns((Tag?)null);
+
+        // Act
+        var act = () => bookManager.AddBookAsync(
+            "Go Like Hell",
+            "A. J. Baime",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            categoryIds: [],
+            tagIds: [missingTagId],
             CancellationToken.None);
 
         // Assert
@@ -162,6 +236,7 @@ public sealed class BookManagerTests
             coverImage: [],
             coverImageContentType: null,
             categoryIds: [],
+            tagIds: [],
             CancellationToken.None);
 
         // Assert
