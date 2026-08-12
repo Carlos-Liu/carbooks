@@ -103,7 +103,7 @@ public sealed class BookTests
     }
 
     [Fact]
-    public void SetCoverImage_EmptyContent_ThrowsDomainValidationException()
+    public void SetCoverImage_EmptyContent_DoesNotSetCoverImage()
     {
         // Arrange
         var book = new Book(
@@ -112,10 +112,10 @@ public sealed class BookTests
             "A. J. Baime");
 
         // Act
-        var act = () => book.SetCoverImage([], "image/png");
+        book.SetCoverImage([], "image/png");
 
         // Assert
-        Assert.Throws<DomainValidationException>(act);
+        Assert.False(book.HasCoverImage);
     }
 
     [Fact]

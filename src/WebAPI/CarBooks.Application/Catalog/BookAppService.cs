@@ -101,8 +101,7 @@ internal sealed class BookAppService : IBookAppService
 
         if (coverImage.Length > Consts.MaxCoverImageBytes)
         {
-            throw new DomainValidationException(
-                $"Cover image must be {Consts.MaxCoverImageBytes} bytes or fewer.");
+            throw new DomainValidationException($"Cover image must be {Consts.MaxCoverImageBytes} bytes or fewer.");
         }
 
         var contentType = coverImage.ContentType?.Trim() ?? string.Empty;

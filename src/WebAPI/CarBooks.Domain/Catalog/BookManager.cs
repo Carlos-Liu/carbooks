@@ -61,15 +61,7 @@ public sealed class BookManager
             recommendation,
             isbn);
 
-        if (coverImage is { Length: > 0 })
-        {
-            if (string.IsNullOrWhiteSpace(coverImageContentType))
-            {
-                throw new DomainValidationException("Cover image content type is required when an image is uploaded.");
-            }
-
-            book.SetCoverImage(coverImage, coverImageContentType);
-        }
+        book.SetCoverImage(coverImage, coverImageContentType);
 
         await bookRepository.AddAsync(book, cancellationToken);
         await AssignCategoriesAsync(book.Id, categoryIds, cancellationToken);

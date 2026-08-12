@@ -234,9 +234,7 @@ public sealed class BookManagerTests
     [Fact]
     public async Task AddBookAsync_EmptyCoverImageBytes_DoesNotSetCoverImage()
     {
-        // Arrange
-
-        // Act
+        // Arrange & Act
         var book = await bookManager.AddBookAsync(
             "Go Like Hell",
             "A. J. Baime",

@@ -77,11 +77,21 @@ public sealed class Book : Entity
     public bool HasCoverImage =>
         CoverImage is { Length: > 0 } && !string.IsNullOrWhiteSpace(CoverImageContentType);
 
-    public void SetCoverImage(byte[] content, string contentType)
+    public void SetCoverImage(byte[]? content, string? contentType)
     {
-        if (content.Length == 0)
+        if (content == null || content?.Length == 0)
         {
-            throw new DomainValidationException("Cover image content must not be empty.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(contentType))
+        {
+            throw new DomainValidationException("Cover image content type is required when an image is uploaded.");
+        }        
+
+        if (content?.Length > Consts.MaxCoverImageBytes)
+        {
+            throw new DomainValidationException($"Cover image must be {Consts.MaxCoverImageBytes} bytes or fewer.");
         }
 
         CoverImage = content;
