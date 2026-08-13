@@ -37,10 +37,13 @@ internal static class Mappings
     public static IReadOnlyList<BookDto> ToDtos(
         this IEnumerable<Book> books,
         IDataUriFactory dataUriFactory,
-        IReadOnlyDictionary<Guid, IReadOnlyList<Tag>> tagsByBookId) =>
-        books
-            .Select(book => book.ToDto(
-                dataUriFactory,
-                tagsByBookId.GetValueOrDefault(book.Id)))
-            .ToList();
+        IReadOnlyDictionary<Guid, IReadOnlyList<Tag>> tagsByBookId)
+    {
+        ArgumentNullException.ThrowIfNull(books);
+        return books
+                .Select(book => book.ToDto(
+                    dataUriFactory,
+                    tagsByBookId.GetValueOrDefault(book.Id)))
+                .ToList();
+    }
 }

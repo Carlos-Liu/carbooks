@@ -25,6 +25,12 @@ internal sealed class EfCategoryRepository : ICategoryRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(category => category.Id == id, cancellationToken);
 
+    public async Task<List<Category>> FindByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken) =>
+        await dbContext.Categories
+            .AsNoTracking()
+            .Where(category => ids.Contains(category.Id))
+            .ToListAsync(cancellationToken);
+
     public async Task<IReadOnlyDictionary<Guid, int>> CountBooksByCategoryAsync(CancellationToken cancellationToken) =>
         await dbContext.CategoryBooks
             .AsNoTracking()

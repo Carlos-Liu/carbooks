@@ -24,4 +24,11 @@ internal sealed class EfTagRepository : ITagRepository
         dbContext.Tags
             .AsNoTracking()
             .FirstOrDefaultAsync(tag => tag.Id == id, cancellationToken);
+
+
+    public async Task<List<Tag>> FindByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken) =>
+        await dbContext.Tags
+            .AsNoTracking()
+            .Where(tag => ids.Contains(tag.Id))
+            .ToListAsync(cancellationToken);
 }

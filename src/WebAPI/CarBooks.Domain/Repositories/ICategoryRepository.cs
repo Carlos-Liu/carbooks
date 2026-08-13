@@ -9,5 +9,7 @@ public interface ICategoryRepository
 
     Task<Category?> FindAsync(Guid id, CancellationToken cancellationToken);
 
+    Task<List<Category>> FindByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken);
+
     Task<IReadOnlyDictionary<Guid, int>> CountBooksByCategoryAsync(CancellationToken cancellationToken);
 }

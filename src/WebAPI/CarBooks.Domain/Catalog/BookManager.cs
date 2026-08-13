@@ -82,10 +82,15 @@ public sealed class BookManager
         }
 
         var links = new List<CategoryBooks>(distinctCategoryIds.Count);
+        var categoryEntities = await categoryRepository.FindByIdsAsync(distinctCategoryIds, cancellationToken);
+
         foreach (var categoryId in distinctCategoryIds)
         {
-            _ = await categoryRepository.FindAsync(categoryId, cancellationToken)
-                ?? throw new EntityNotFoundException(nameof(Category), categoryId);
+            var categoryExist = categoryEntities.Any(c => c.Id == categoryId);
+            if (!categoryExist)
+            {
+                throw new EntityNotFoundException(nameof(Category), categoryId);
+            }
 
             links.Add(new CategoryBooks(categoryId, bookId));
         }
@@ -104,11 +109,16 @@ public sealed class BookManager
             return;
         }
 
-        var links = new List<BookTags>(distinctTagIds.Count);
+        var links = new List<BookTags>(distinctTagIds.Count);        
+        var tagEntities = await tagRepository.FindByIdsAsync(distinctTagIds, cancellationToken);
+
         foreach (var tagId in distinctTagIds)
         {
-            _ = await tagRepository.FindAsync(tagId, cancellationToken)
-                ?? throw new EntityNotFoundException(nameof(Tag), tagId);
+            var tagExist = tagEntities.Any(t => t.Id == tagId);
+            if (!tagExist)
+            {
+                throw new EntityNotFoundException(nameof(Tag), tagId);
+            }
 
             links.Add(new BookTags(tagId, bookId));
         }

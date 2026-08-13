@@ -112,8 +112,8 @@ public sealed class BookManagerTests
     {
         // Arrange
         var categoryId = Guid.Parse("11111111-1111-4111-8111-111111110001");
-        categoryRepository.FindAsync(categoryId, Arg.Any<CancellationToken>())
-            .Returns(new Category(categoryId, "Category 1"));
+        categoryRepository.FindByIdsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+            .Returns([new Category(categoryId, "Category 1")]);
 
         // Act
         var book = await bookManager.AddBookAsync(
@@ -146,7 +146,7 @@ public sealed class BookManagerTests
     {
         // Arrange
         var missingCategoryId = Guid.Parse("11111111-1111-4111-8111-111111110099");
-        categoryRepository.FindAsync(missingCategoryId, Arg.Any<CancellationToken>()).Returns((Category?)null);
+        categoryRepository.FindByIdsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>()).Returns([]);
 
         // Act
         var act = () => bookManager.AddBookAsync(
@@ -174,8 +174,8 @@ public sealed class BookManagerTests
     {
         // Arrange
         var tagId = Guid.Parse("33333333-3333-4333-8333-333333330001");
-        tagRepository.FindAsync(tagId, Arg.Any<CancellationToken>())
-            .Returns(new Tag(tagId, "Racing"));
+        tagRepository.FindByIdsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+            .Returns([new Tag(tagId, "Racing")]);
 
         // Act
         var book = await bookManager.AddBookAsync(
@@ -208,7 +208,7 @@ public sealed class BookManagerTests
     {
         // Arrange
         var missingTagId = Guid.Parse("33333333-3333-4333-8333-333333330099");
-        tagRepository.FindAsync(missingTagId, Arg.Any<CancellationToken>()).Returns((Tag?)null);
+        tagRepository.FindByIdsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>()).Returns([]);
 
         // Act
         var act = () => bookManager.AddBookAsync(

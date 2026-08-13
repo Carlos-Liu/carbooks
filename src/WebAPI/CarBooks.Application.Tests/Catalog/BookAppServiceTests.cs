@@ -139,6 +139,32 @@ public sealed class BookAppServiceTests
     }
 
     [Fact]
+    public async Task CreateBookAsync_CoverUrlAndCoverImage_PreservesBoth()
+    {
+        // Arrange
+        var bytes = new byte[] { 1, 2, 3, 4 };
+        var formFile = Substitute.For<IFormFile>();
+        formFile.Length.Returns(bytes.Length);
+        formFile.ContentType.Returns("image/jpeg");
+        formFile.OpenReadStream().Returns(new MemoryStream(bytes));
+        dataUriFactory.Create(Arg.Any<byte[]?>(), "image/jpeg").Returns("data:image/jpeg;base64,AQIDBA==");
+        var request = new CreateBookDto
+        {
+            Name = "Go Like Hell",
+            Author = "A. J. Baime",
+            CoverUrl = "https://example.com/covers/go-like-hell.jpg",
+            CoverImage = formFile,
+        };
+
+        // Act
+        var result = await bookAppService.CreateBookAsync(request, CancellationToken.None);
+
+        // Assert
+        Assert.Equal("https://example.com/covers/go-like-hell.jpg", result.CoverUrl);
+        Assert.Equal("data:image/jpeg;base64,AQIDBA==", result.CoverImage);
+    }
+
+    [Fact]
     public async Task CreateBookAsync_EmptyCoverFile_TreatsCoverAsAbsent()
     {
         // Arrange

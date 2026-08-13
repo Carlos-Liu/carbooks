@@ -112,8 +112,8 @@ internal sealed class BookAppService : IBookAppService
         }
 
         await using var stream = coverImage.OpenReadStream();
-        using var memory = new MemoryStream(capacity: (int)coverImage.Length);
-        await stream.CopyToAsync(memory, cancellationToken);
-        return (memory.ToArray(), contentType);
+        var bytes = new byte[coverImage.Length];
+        await stream.ReadExactlyAsync(bytes, cancellationToken);
+        return (bytes, contentType);
     }
 }
