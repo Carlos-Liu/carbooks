@@ -36,9 +36,24 @@ public sealed class BooksController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<BookDto>> CreateBookAsync(
         [FromForm] CreateBookDto request,
+        [FromForm] IFormFile? coverImage,
         CancellationToken cancellationToken)
     {
-        var book = await bookAppService.CreateBookAsync(request, cancellationToken);
+        byte[]? coverImageContent = null;
+        if (coverImage is not null)
+        {
+            await using var stream = coverImage.OpenReadStream();
+            coverImageContent = new byte[coverImage.Length];
+            await stream.ReadExactlyAsync(coverImageContent, cancellationToken);
+        }
+
+        var coverImageDto = coverImageContent is null ? null : new CoverImageDto
+        {
+            Content = coverImageContent,
+            ContentType = coverImage?.ContentType,
+        };
+
+        var book = await bookAppService.CreateBookAsync(request, coverImageDto, cancellationToken);
         return Created($"api/books/{book.Id}", book);
     }
 }

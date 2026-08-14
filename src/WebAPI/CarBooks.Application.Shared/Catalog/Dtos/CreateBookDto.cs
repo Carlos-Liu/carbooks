@@ -1,12 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using CarBooks.Domain.Shared;
-using Microsoft.AspNetCore.Http;
 
 namespace CarBooks.Application.Shared.Catalog.Dtos;
 
 /// <summary>
-/// Payload for creating a book. Sent as <c>multipart/form-data</c> so the caller can upload a
-/// local cover image file together with the text fields.
+/// Application payload for creating a book.
 /// </summary>
 public sealed class CreateBookDto
 {
@@ -42,9 +40,6 @@ public sealed class CreateBookDto
     /// <summary>Absolute URL of the publisher cover artwork.</summary>
     [MaxLength(Consts.MaxCoverUrlLength)]
     public string? CoverUrl { get; init; }
-
-    /// <summary>Optional cover image selected from the caller's local machine.</summary>
-    public IFormFile? CoverImage { get; init; }
 
     /// <summary>Optional category identifiers to assign (zero or more).</summary>
     public IList<Guid> CategoryIds { get; init; } = new List<Guid>();

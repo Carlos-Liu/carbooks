@@ -5,7 +5,6 @@ using CarBooks.Domain.Repositories;
 using CarBooks.Domain.Shared;
 using CarBooks.Domain.Shared.Errors;
 using CarBooks.Infrastructure.Media;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CarBooks.Application.Tests.Catalog;
@@ -46,7 +45,7 @@ public sealed class BookAppServiceTests
     public async Task CreateBookAsync_NullRequest_ThrowsArgumentNullException()
     {
         // Arrange & Act
-        var act = () => bookAppService.CreateBookAsync(null!, CancellationToken.None);
+        var act = () => bookAppService.CreateBookAsync(null!, null, CancellationToken.None);
 
         // Assert
         await Assert.ThrowsAsync<ArgumentNullException>(act);
@@ -63,7 +62,7 @@ public sealed class BookAppServiceTests
         };
 
         // Act
-        var result = await bookAppService.CreateBookAsync(request, CancellationToken.None);
+        var result = await bookAppService.CreateBookAsync(request, null, CancellationToken.None);
 
         // Assert
         Assert.Equal("Go Like Hell", result.Name);
@@ -74,19 +73,20 @@ public sealed class BookAppServiceTests
     public async Task CreateBookAsync_OversizedCoverImage_ThrowsDomainValidationException()
     {
         // Arrange
-        var formFile = Substitute.For<IFormFile>();
-        formFile.Length.Returns(Consts.MaxCoverImageBytes + 1);
-        formFile.ContentType.Returns("image/png");
         var request = new CreateBookDto
         {
             Name = "Go Like Hell",
             Author = "A. J. Baime",
-            CoverImage = formFile,
+        };
+        var coverImage = new CoverImageDto
+        {
+            Content = new byte[Consts.MaxCoverImageBytes + 1],
+            ContentType = "image/png",
         };
 
         // Act
         var exception = await Assert.ThrowsAsync<DomainValidationException>(() =>
-            bookAppService.CreateBookAsync(request, CancellationToken.None));
+            bookAppService.CreateBookAsync(request, coverImage, CancellationToken.None));
 
         // Assert
         Assert.Contains("bytes or fewer", exception.Message);
@@ -96,19 +96,19 @@ public sealed class BookAppServiceTests
     public async Task CreateBookAsync_UnsupportedCoverContentType_ThrowsDomainValidationException()
     {
         // Arrange
-        var formFile = Substitute.For<IFormFile>();
-        formFile.Length.Returns(10);
-        formFile.ContentType.Returns("application/pdf");
-        formFile.OpenReadStream().Returns(new MemoryStream([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
         var request = new CreateBookDto
         {
             Name = "Go Like Hell",
             Author = "A. J. Baime",
-            CoverImage = formFile,
+        };
+        var coverImage = new CoverImageDto
+        {
+            Content = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            ContentType = "application/pdf",
         };
 
         // Act
-        var act = () => bookAppService.CreateBookAsync(request, CancellationToken.None);
+        var act = () => bookAppService.CreateBookAsync(request, coverImage, CancellationToken.None);
 
         // Assert
         await Assert.ThrowsAsync<DomainValidationException>(act);
@@ -119,20 +119,20 @@ public sealed class BookAppServiceTests
     {
         // Arrange
         var bytes = new byte[] { 1, 2, 3, 4 };
-        var formFile = Substitute.For<IFormFile>();
-        formFile.Length.Returns(bytes.Length);
-        formFile.ContentType.Returns("image/jpeg");
-        formFile.OpenReadStream().Returns(new MemoryStream(bytes));
         dataUriFactory.Create(Arg.Any<byte[]?>(), "image/jpeg").Returns("data:image/jpeg;base64,AQIDBA==");
         var request = new CreateBookDto
         {
             Name = "Go Like Hell",
             Author = "A. J. Baime",
-            CoverImage = formFile,
+        };
+        var coverImage = new CoverImageDto
+        {
+            Content = bytes,
+            ContentType = "image/jpeg",
         };
 
         // Act
-        var result = await bookAppService.CreateBookAsync(request, CancellationToken.None);
+        var result = await bookAppService.CreateBookAsync(request, coverImage, CancellationToken.None);
 
         // Assert
         Assert.Equal("data:image/jpeg;base64,AQIDBA==", result.CoverImage);
@@ -143,21 +143,21 @@ public sealed class BookAppServiceTests
     {
         // Arrange
         var bytes = new byte[] { 1, 2, 3, 4 };
-        var formFile = Substitute.For<IFormFile>();
-        formFile.Length.Returns(bytes.Length);
-        formFile.ContentType.Returns("image/jpeg");
-        formFile.OpenReadStream().Returns(new MemoryStream(bytes));
         dataUriFactory.Create(Arg.Any<byte[]?>(), "image/jpeg").Returns("data:image/jpeg;base64,AQIDBA==");
         var request = new CreateBookDto
         {
             Name = "Go Like Hell",
             Author = "A. J. Baime",
             CoverUrl = "https://example.com/covers/go-like-hell.jpg",
-            CoverImage = formFile,
+        };
+        var coverImage = new CoverImageDto
+        {
+            Content = bytes,
+            ContentType = "image/jpeg",
         };
 
         // Act
-        var result = await bookAppService.CreateBookAsync(request, CancellationToken.None);
+        var result = await bookAppService.CreateBookAsync(request, coverImage, CancellationToken.None);
 
         // Assert
         Assert.Equal("https://example.com/covers/go-like-hell.jpg", result.CoverUrl);
@@ -168,17 +168,18 @@ public sealed class BookAppServiceTests
     public async Task CreateBookAsync_EmptyCoverFile_TreatsCoverAsAbsent()
     {
         // Arrange
-        var formFile = Substitute.For<IFormFile>();
-        formFile.Length.Returns(0);
         var request = new CreateBookDto
         {
             Name = "Go Like Hell",
             Author = "A. J. Baime",
-            CoverImage = formFile,
+        };
+        var coverImage = new CoverImageDto
+        {
+            Content = [],
         };
 
         // Act
-        var result = await bookAppService.CreateBookAsync(request, CancellationToken.None);
+        var result = await bookAppService.CreateBookAsync(request, coverImage, CancellationToken.None);
 
         // Assert
         Assert.Null(result.CoverImage);

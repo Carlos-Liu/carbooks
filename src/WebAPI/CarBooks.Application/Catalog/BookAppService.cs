@@ -6,7 +6,6 @@ using CarBooks.Domain.Repositories;
 using CarBooks.Domain.Shared;
 using CarBooks.Domain.Shared.Errors;
 using CarBooks.Infrastructure.Media;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace CarBooks.Application.Catalog;
@@ -61,11 +60,14 @@ internal sealed class BookAppService : IBookAppService
             result.Books.ToDtos(dataUriFactory, tagsByBookId));
     }
 
-    public async Task<BookDto> CreateBookAsync(CreateBookDto request, CancellationToken cancellationToken)
+    public async Task<BookDto> CreateBookAsync(
+        CreateBookDto request,
+        CoverImageDto? coverImage,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var (coverImage, contentType) = await ReadCoverImageAsync(request.CoverImage, cancellationToken);
+        var (coverImageContent, contentType) = await ReadCoverImageAsync(coverImage, cancellationToken);
 
         var book = await bookManager.AddBookAsync(
             request.Name,
@@ -76,7 +78,7 @@ internal sealed class BookAppService : IBookAppService
             request.PublishedOn,
             request.Recommendation,
             request.Isbn,
-            coverImage,
+            coverImageContent,
             contentType,
             request.CategoryIds,
             request.TagIds,
@@ -90,16 +92,18 @@ internal sealed class BookAppService : IBookAppService
         return book.ToDto(dataUriFactory, tags);
     }
 
-    private static async Task<(byte[]? Content, string? ContentType)> ReadCoverImageAsync(
-        IFormFile? coverImage,
+    private static Task<(byte[]? Content, string? ContentType)> ReadCoverImageAsync(
+        CoverImageDto? coverImage,
         CancellationToken cancellationToken)
     {
-        if (coverImage is null || coverImage.Length == 0)
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (coverImage is null || coverImage.Content.Length == 0)
         {
-            return (null, null);
+            return Task.FromResult<(byte[]? Content, string? ContentType)>((null, null));
         }
 
-        if (coverImage.Length > Consts.MaxCoverImageBytes)
+        if (coverImage.Content.Length > Consts.MaxCoverImageBytes)
         {
             throw new DomainValidationException($"Cover image must be {Consts.MaxCoverImageBytes} bytes or fewer.");
         }
@@ -111,9 +115,6 @@ internal sealed class BookAppService : IBookAppService
                 "Cover image must be a JPEG, PNG, GIF, WebP or SVG file.");
         }
 
-        await using var stream = coverImage.OpenReadStream();
-        var bytes = new byte[coverImage.Length];
-        await stream.ReadExactlyAsync(bytes, cancellationToken);
-        return (bytes, contentType);
+        return Task.FromResult<(byte[]? Content, string? ContentType)>((coverImage.Content, contentType));
     }
 }
