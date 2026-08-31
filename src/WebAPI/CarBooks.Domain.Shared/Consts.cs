@@ -24,6 +24,6 @@ public static class Consts
 
     public const int MaxContentTypeLength = 128;
 
-    /// <summary>Maximum size of an uploaded cover image in bytes (5 MB).</summary>
-    public const int MaxCoverImageBytes = 5 * 1024 * 1024;
+    /// <summary>Maximum size of an uploaded cover image in bytes (2 MB).</summary>
+    public const int MaxCoverImageBytes = 2 * 1024 * 1024;
 }

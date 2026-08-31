@@ -79,7 +79,7 @@ public sealed class Book : Entity
 
     public void SetCoverImage(byte[]? content, string? contentType)
     {
-        if (content == null || content?.Length == 0)
+        if (content == null || content.Length == 0)
         {
             return;
         }
@@ -89,7 +89,7 @@ public sealed class Book : Entity
             throw new DomainValidationException("Cover image content type is required when an image is uploaded.");
         }        
 
-        if (content?.Length > Consts.MaxCoverImageBytes)
+        if (content.Length > Consts.MaxCoverImageBytes)
         {
             throw new DomainValidationException($"Cover image must be {Consts.MaxCoverImageBytes} bytes or fewer.");
         }
