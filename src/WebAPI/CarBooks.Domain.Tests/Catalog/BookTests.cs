@@ -84,6 +84,20 @@ public sealed class BookTests
     }
 
     [Fact]
+    public void Constructor_FuturePublishedOn_ThrowsDomainValidationException()
+    {
+        // Arrange
+        var id = Guid.Parse("22222222-2222-4222-8222-222222220001");
+        var publishedOn = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1);
+
+        // Act
+        var act = () => new Book(id, "Go Like Hell", "A. J. Baime", publishedOn: publishedOn);
+
+        // Assert
+        Assert.Throws<DomainValidationException>(act);
+    }
+
+    [Fact]
     public void SetCoverImage_ValidImage_StoresImageAndSetsHasCoverImage()
     {
         // Arrange
@@ -100,6 +114,51 @@ public sealed class BookTests
         Assert.True(book.HasCoverImage);
         Assert.Equal(content, book.CoverImage);
         Assert.Equal("image/png", book.CoverImageContentType);
+    }
+
+    [Fact]
+    public void SetCoverImage_MutatingSourceArray_DoesNotChangeStoredImage()
+    {
+        // Arrange
+        var book = new Book(
+            Guid.Parse("22222222-2222-4222-8222-222222220001"),
+            "Go Like Hell",
+            "A. J. Baime");
+        byte[] content = [1, 2, 3];
+
+        // Act
+        book.SetCoverImage(content, "image/png");
+        content[0] = 9;
+
+        // Assert
+        Assert.Equal([1, 2, 3], book.CoverImage);
+    }
+
+    [Fact]
+    public void CoverImage_MutatingReturnedArray_DoesNotChangeStoredImage()
+    {
+        // Arrange
+        var book = new Book(
+            Guid.Parse("22222222-2222-4222-8222-222222220001"),
+            "Go Like Hell",
+            "A. J. Baime");
+        book.SetCoverImage([1, 2, 3], "image/png");
+
+        // Act
+        book.CoverImage![0] = 9;
+
+        // Assert
+        Assert.Equal([1, 2, 3], book.CoverImage);
+    }
+
+    [Fact]
+    public void Constructor_EmptyId_ThrowsDomainValidationException()
+    {
+        // Act
+        var act = () => new Book(Guid.Empty, "Go Like Hell", "A. J. Baime");
+
+        // Assert
+        Assert.Throws<DomainValidationException>(act);
     }
 
     [Fact]

@@ -1,3 +1,5 @@
+using CarBooks.Domain.Shared.Errors;
+
 namespace CarBooks.Domain;
 
 /// <summary>
@@ -10,7 +12,7 @@ public abstract class Entity
     {
         if (id == Guid.Empty)
         {
-            throw new ArgumentException("Identity must not be an empty GUID.", nameof(id));
+            throw new DomainValidationException("Identity must not be an empty GUID.");
         }
 
         Id = id;

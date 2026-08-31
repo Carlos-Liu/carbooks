@@ -15,6 +15,8 @@ namespace CarBooks.Domain.Catalog;
 /// </remarks>
 public sealed class Book : Entity
 {
+    private byte[]? coverImage;
+
     public Book(
         Guid id,
         string name,
@@ -32,7 +34,7 @@ public sealed class Book : Entity
         CoverUrl = Guard.OptionalAbsoluteUrl(coverUrl, nameof(CoverUrl));
         Translator = Guard.OptionalText(translator);
         Publisher = Guard.OptionalText(publisher);
-        PublishedOn = publishedOn;
+        PublishedOn = ValidatePublishedOn(publishedOn);
         Recommendation = Guard.OptionalText(recommendation);
         Isbn = Guard.OptionalText(isbn);
     }
@@ -69,13 +71,17 @@ public sealed class Book : Entity
     public string? CoverUrl { get; private set; }
 
     /// <summary>Locally stored cover artwork, or <see langword="null"/> when only the URL is known.</summary>
-    public byte[]? CoverImage { get; private set; }
+    public byte[]? CoverImage
+    {
+        get => coverImage?.ToArray();
+        private set => coverImage = value;
+    }
 
     [MaxLength(Consts.MaxContentTypeLength)]
     public string? CoverImageContentType { get; private set; }
 
     public bool HasCoverImage =>
-        CoverImage is { Length: > 0 } && !string.IsNullOrWhiteSpace(CoverImageContentType);
+        coverImage is { Length: > 0 } && !string.IsNullOrWhiteSpace(CoverImageContentType);
 
     public void SetCoverImage(byte[]? content, string? contentType)
     {
@@ -94,7 +100,7 @@ public sealed class Book : Entity
             throw new DomainValidationException($"Cover image must be {Consts.MaxCoverImageBytes} bytes or fewer.");
         }
 
-        CoverImage = content;
+        CoverImage = content.ToArray();
         CoverImageContentType = Guard.Text(contentType, nameof(CoverImageContentType));
     }
 
@@ -102,5 +108,15 @@ public sealed class Book : Entity
     {
         CoverImage = null;
         CoverImageContentType = null;
+    }
+
+    private static DateOnly? ValidatePublishedOn(DateOnly? publishedOn)
+    {
+        if (publishedOn > DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            throw new DomainValidationException("Published date must not be in the future.");
+        }
+
+        return publishedOn;
     }
 }

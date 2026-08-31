@@ -46,8 +46,8 @@ public sealed class BookManager
         string? isbn,
         byte[]? coverImage,
         string? coverImageContentType,
-        IEnumerable<Guid> categoryIds,
-        IEnumerable<Guid> tagIds,
+        IEnumerable<Guid>? categoryIds,
+        IEnumerable<Guid>? tagIds,
         CancellationToken cancellationToken)
     {
         var book = new Book(
@@ -72,10 +72,10 @@ public sealed class BookManager
 
     private async Task AssignCategoriesAsync(
         Guid bookId,
-        IEnumerable<Guid> categoryIds,
+        IEnumerable<Guid>? categoryIds,
         CancellationToken cancellationToken)
     {
-        var distinctCategoryIds = categoryIds.Distinct().ToList();
+        var distinctCategoryIds = categoryIds?.Distinct().ToList() ?? [];
         if (distinctCategoryIds.Count == 0)
         {
             return;
@@ -100,10 +100,10 @@ public sealed class BookManager
 
     private async Task AssignTagsAsync(
         Guid bookId,
-        IEnumerable<Guid> tagIds,
+        IEnumerable<Guid>? tagIds,
         CancellationToken cancellationToken)
     {
-        var distinctTagIds = tagIds.Distinct().ToList();
+        var distinctTagIds = tagIds?.Distinct().ToList() ?? [];
         if (distinctTagIds.Count == 0)
         {
             return;

@@ -57,6 +57,36 @@ public sealed class BookManagerTests
     }
 
     [Fact]
+    public async Task AddBookAsync_NullCategoriesAndTags_TreatsThemAsEmpty()
+    {
+        // Arrange
+
+        // Act
+        var book = await bookManager.AddBookAsync(
+            "Go Like Hell",
+            "A. J. Baime",
+            coverUrl: null,
+            translator: null,
+            publisher: null,
+            publishedOn: null,
+            recommendation: null,
+            isbn: null,
+            coverImage: null,
+            coverImageContentType: null,
+            categoryIds: null,
+            tagIds: null,
+            CancellationToken.None);
+
+        // Assert
+        Assert.Equal("Go Like Hell", book.Name);
+        await categoryBooksRepository.DidNotReceive()
+            .AddRangeAsync(Arg.Any<IEnumerable<CategoryBooks>>(), Arg.Any<CancellationToken>());
+        await bookTagsRepository.DidNotReceive()
+            .AddRangeAsync(Arg.Any<IEnumerable<BookTags>>(), Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task AddBookAsync_CoverImageWithoutContentType_ThrowsDomainValidationException()
     {
         // Arrange & Act
