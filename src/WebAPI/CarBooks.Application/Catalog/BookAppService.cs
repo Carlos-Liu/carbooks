@@ -18,7 +18,6 @@ internal sealed class BookAppService : IBookAppService
         "image/png",
         "image/gif",
         "image/webp",
-        "image/svg+xml",
     };
 
     private readonly CatalogManager catalogManager;
@@ -112,7 +111,7 @@ internal sealed class BookAppService : IBookAppService
         if (!AllowedCoverImageContentTypes.Contains(contentType))
         {
             throw new DomainValidationException(
-                "Cover image must be a JPEG, PNG, GIF, WebP or SVG file.");
+                "Cover image must be a JPEG, PNG, GIF or WebP file.");
         }
 
         return Task.FromResult<(byte[]? Content, string? ContentType)>((coverImage.Content, contentType));

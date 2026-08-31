@@ -115,6 +115,28 @@ public sealed class BookAppServiceTests
     }
 
     [Fact]
+    public async Task CreateBookAsync_SvgCoverContentType_ThrowsDomainValidationException()
+    {
+        // Arrange
+        var request = new CreateBookDto
+        {
+            Name = "Go Like Hell",
+            Author = "A. J. Baime",
+        };
+        var coverImage = new CoverImageDto
+        {
+            Content = [1, 2, 3, 4],
+            ContentType = "image/svg+xml",
+        };
+
+        // Act
+        var act = () => bookAppService.CreateBookAsync(request, coverImage, CancellationToken.None);
+
+        // Assert
+        await Assert.ThrowsAsync<DomainValidationException>(act);
+    }
+
+    [Fact]
     public async Task CreateBookAsync_SupportedCoverImage_ReturnsCoverDataUri()
     {
         // Arrange
