@@ -1,4 +1,5 @@
 using CarBooks.Domain.Catalog;
+using CarBooks.Domain.Shared.Media;
 
 namespace CarBooks.Domain.Repositories;
 
@@ -8,6 +9,8 @@ public interface IBookRepository
     Task<IReadOnlyList<Book>> ListByCategoryAsync(Guid categoryId, CancellationToken cancellationToken);
 
     Task<Book?> FindAsync(Guid bookId, CancellationToken cancellationToken);
+
+    Task<ImageContent?> FindCoverThumbnailAsync(Guid bookId, CancellationToken cancellationToken);
 
     Task AddAsync(Book book, CancellationToken cancellationToken);
 }

@@ -42,6 +42,8 @@ public sealed class BookManagerTests
             isbn: null,
             coverImage: null,
             coverImageContentType: null,
+            coverThumbnail: null,
+            coverThumbnailContentType: null,
             categoryIds: [],
             tagIds: [],
             CancellationToken.None);
@@ -73,6 +75,8 @@ public sealed class BookManagerTests
             isbn: null,
             coverImage: null,
             coverImageContentType: null,
+            coverThumbnail: null,
+            coverThumbnailContentType: null,
             categoryIds: null,
             tagIds: null,
             CancellationToken.None);
@@ -101,6 +105,8 @@ public sealed class BookManagerTests
             null,
             coverImage: [1, 2, 3],
             coverImageContentType: null,
+            coverThumbnail: null,
+            coverThumbnailContentType: null,
             categoryIds: [],
             tagIds: [],
             CancellationToken.None);
@@ -127,6 +133,8 @@ public sealed class BookManagerTests
             null,
             coverImage: [1, 2, 3],
             coverImageContentType: "image/png",
+            coverThumbnail: null,
+            coverThumbnailContentType: null,
             categoryIds: [],
             tagIds: [],
             CancellationToken.None);
@@ -149,6 +157,8 @@ public sealed class BookManagerTests
         var book = await bookManager.AddBookAsync(
             "Go Like Hell",
             "A. J. Baime",
+            null,
+            null,
             null,
             null,
             null,
@@ -190,6 +200,8 @@ public sealed class BookManagerTests
             null,
             null,
             null,
+            null,
+            null,
             categoryIds: [missingCategoryId],
             tagIds: [],
             CancellationToken.None);
@@ -211,6 +223,8 @@ public sealed class BookManagerTests
         var book = await bookManager.AddBookAsync(
             "Go Like Hell",
             "A. J. Baime",
+            null,
+            null,
             null,
             null,
             null,
@@ -252,6 +266,8 @@ public sealed class BookManagerTests
             null,
             null,
             null,
+            null,
+            null,
             categoryIds: [],
             tagIds: [missingTagId],
             CancellationToken.None);
@@ -276,6 +292,8 @@ public sealed class BookManagerTests
             null,
             coverImage: [],
             coverImageContentType: null,
+            coverThumbnail: null,
+            coverThumbnailContentType: null,
             categoryIds: [],
             tagIds: [],
             CancellationToken.None);

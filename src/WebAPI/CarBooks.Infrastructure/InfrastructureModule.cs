@@ -13,5 +13,9 @@ public sealed class InfrastructureModule : Module
         builder.RegisterType<DataUriFactory>()
             .As<IDataUriFactory>()
             .SingleInstance();
+
+        builder.RegisterType<CoverThumbnailGenerator>()
+            .As<ICoverThumbnailGenerator>()
+            .SingleInstance();
     }
 }

@@ -12,10 +12,7 @@ namespace CarBooks.Application.Shared.Catalog.Dtos;
 /// <param name="Recommendation">Short recommendation blurb, if any.</param>
 /// <param name="Isbn">ISBN, if known.</param>
 /// <param name="CoverUrl">Absolute URL of the publisher cover artwork, if any.</param>
-/// <param name="CoverImage">
-/// Locally stored cover artwork encoded as a <c>data:</c> URI, or <see langword="null"/> when no
-/// local image is stored.
-/// </param>
+/// <param name="CoverThumbnailUrl">URL for the locally stored thumbnail, if any.</param>
 /// <param name="Tags">Tags assigned to the book (may be empty).</param>
 public sealed record BookDto(
     Guid Id,
@@ -27,5 +24,5 @@ public sealed record BookDto(
     string? Recommendation,
     string? Isbn,
     string? CoverUrl,
-    string? CoverImage,
+    string? CoverThumbnailUrl,
     IReadOnlyList<TagDto> Tags);

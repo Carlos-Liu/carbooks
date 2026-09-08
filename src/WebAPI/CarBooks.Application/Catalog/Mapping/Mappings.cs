@@ -19,7 +19,7 @@ internal static class Mappings
 
     public static BookDto ToDto(
         this Book book,
-        IDataUriFactory dataUriFactory,
+        Func<Guid, string> thumbnailUrlFactory,
         IReadOnlyList<Tag>? tags = null) =>
         new(
             book.Id,
@@ -31,18 +31,18 @@ internal static class Mappings
             book.Recommendation,
             book.Isbn,
             book.CoverUrl,
-            dataUriFactory.Create(book.CoverImage, book.CoverImageContentType),
+            book.HasCoverThumbnail ? thumbnailUrlFactory(book.Id) : null,
             (tags ?? []).Select(tag => tag.ToDto()).ToList());
 
     public static IReadOnlyList<BookDto> ToDtos(
         this IEnumerable<Book> books,
-        IDataUriFactory dataUriFactory,
+        Func<Guid, string> thumbnailUrlFactory,
         IReadOnlyDictionary<Guid, IReadOnlyList<Tag>> tagsByBookId)
     {
         ArgumentNullException.ThrowIfNull(books);
         return books
                 .Select(book => book.ToDto(
-                    dataUriFactory,
+                    thumbnailUrlFactory,
                     tagsByBookId.GetValueOrDefault(book.Id)))
                 .ToList();
     }

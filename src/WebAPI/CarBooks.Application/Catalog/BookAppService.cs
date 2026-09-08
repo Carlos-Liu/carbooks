@@ -22,21 +22,24 @@ internal sealed class BookAppService : IBookAppService
 
     private readonly CatalogManager catalogManager;
     private readonly BookManager bookManager;
+    private readonly IBookRepository bookRepository;
     private readonly IBookTagsRepository bookTagsRepository;
-    private readonly IDataUriFactory dataUriFactory;
+    private readonly ICoverThumbnailGenerator coverThumbnailGenerator;
     private readonly ILogger<BookAppService> logger;
 
     public BookAppService(
         CatalogManager catalogManager,
         BookManager bookManager,
+        IBookRepository bookRepository,
         IBookTagsRepository bookTagsRepository,
-        IDataUriFactory dataUriFactory,
+        ICoverThumbnailGenerator coverThumbnailGenerator,
         ILogger<BookAppService> logger)
     {
         this.catalogManager = catalogManager;
         this.bookManager = bookManager;
+        this.bookRepository = bookRepository;
         this.bookTagsRepository = bookTagsRepository;
-        this.dataUriFactory = dataUriFactory;
+        this.coverThumbnailGenerator = coverThumbnailGenerator;
         this.logger = logger;
     }
 
@@ -56,7 +59,7 @@ internal sealed class BookAppService : IBookAppService
 
         return new CategoryBooksDto(
             result.Category.ToDto(result.Books.Count),
-            result.Books.ToDtos(dataUriFactory, tagsByBookId));
+            result.Books.ToDtos(CreateCoverThumbnailUrl, tagsByBookId));
     }
 
     public async Task<BookDto> CreateBookAsync(
@@ -67,6 +70,9 @@ internal sealed class BookAppService : IBookAppService
         ArgumentNullException.ThrowIfNull(request);
 
         var (coverImageContent, contentType) = await ReadCoverImageAsync(coverImage, cancellationToken);
+        var coverThumbnail = coverImageContent is null || contentType is null
+            ? null
+            : coverThumbnailGenerator.Generate(coverImageContent, contentType);
 
         var book = await bookManager.AddBookAsync(
             request.Name,
@@ -79,6 +85,8 @@ internal sealed class BookAppService : IBookAppService
             request.Isbn,
             coverImageContent,
             contentType,
+            coverThumbnail?.Content,
+            coverThumbnail?.ContentType,
             request.CategoryIds,
             request.TagIds,
             cancellationToken);
@@ -88,7 +96,19 @@ internal sealed class BookAppService : IBookAppService
 
         logger.LogInformation("Created book {BookId} ({BookName}).", book.Id, book.Name);
 
-        return book.ToDto(dataUriFactory, tags);
+        return book.ToDto(CreateCoverThumbnailUrl, tags);
+    }
+
+    public async Task<CoverImageDto> GetCoverThumbnailAsync(Guid bookId, CancellationToken cancellationToken)
+    {
+        var thumbnail = await bookRepository.FindCoverThumbnailAsync(bookId, cancellationToken)
+            ?? throw new EntityNotFoundException(nameof(Book), bookId);
+
+        return new CoverImageDto
+        {
+            Content = thumbnail.Content,
+            ContentType = thumbnail.ContentType,
+        };
     }
 
     private static Task<(byte[]? Content, string? ContentType)> ReadCoverImageAsync(
@@ -116,4 +136,6 @@ internal sealed class BookAppService : IBookAppService
 
         return Task.FromResult<(byte[]? Content, string? ContentType)>((coverImage.Content, contentType));
     }
+
+    private static string CreateCoverThumbnailUrl(Guid bookId) => $"/api/books/{bookId}/cover/thumbnail";
 }

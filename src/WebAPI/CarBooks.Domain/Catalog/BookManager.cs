@@ -46,6 +46,8 @@ public sealed class BookManager
         string? isbn,
         byte[]? coverImage,
         string? coverImageContentType,
+        byte[]? coverThumbnail,
+        string? coverThumbnailContentType,
         IEnumerable<Guid>? categoryIds,
         IEnumerable<Guid>? tagIds,
         CancellationToken cancellationToken)
@@ -62,6 +64,7 @@ public sealed class BookManager
             isbn);
 
         book.SetCoverImage(coverImage, coverImageContentType);
+        book.SetCoverThumbnail(coverThumbnail, coverThumbnailContentType);
 
         await bookRepository.AddAsync(book, cancellationToken);
         await AssignCategoriesAsync(book.Id, categoryIds, cancellationToken);

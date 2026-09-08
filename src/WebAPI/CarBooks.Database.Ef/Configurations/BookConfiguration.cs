@@ -14,8 +14,10 @@ internal sealed class BookConfiguration : IEntityTypeConfiguration<Book>
         builder.Property(book => book.Name).IsRequired();
         builder.Property(book => book.Author).IsRequired();
         builder.Property(book => book.CoverImage).HasColumnType("bytea");
+        builder.Property(book => book.CoverThumbnail).HasColumnType("bytea");
         builder.Property(book => book.PublishedOn).HasColumnType("date");
 
         builder.Ignore(book => book.HasCoverImage);
+        builder.Ignore(book => book.HasCoverThumbnail);
     }
 }

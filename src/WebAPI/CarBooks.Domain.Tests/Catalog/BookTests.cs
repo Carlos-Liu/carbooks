@@ -152,6 +152,62 @@ public sealed class BookTests
     }
 
     [Fact]
+    public void SetCoverThumbnail_ValidThumbnail_StoresThumbnailAndSetsHasCoverThumbnail()
+    {
+        // Arrange
+        var book = new Book(
+            Guid.Parse("22222222-2222-4222-8222-222222220001"),
+            "Go Like Hell",
+            "A. J. Baime");
+        byte[] content = [1, 2, 3];
+
+        // Act
+        book.SetCoverThumbnail(content, "image/png");
+
+        // Assert
+        Assert.True(book.HasCoverThumbnail);
+        Assert.Equal(content, book.CoverThumbnail);
+        Assert.Equal("image/png", book.CoverThumbnailContentType);
+    }
+
+    [Fact]
+    public void CoverThumbnail_MutatingReturnedArray_DoesNotChangeStoredThumbnail()
+    {
+        // Arrange
+        var book = new Book(
+            Guid.Parse("22222222-2222-4222-8222-222222220001"),
+            "Go Like Hell",
+            "A. J. Baime");
+        book.SetCoverThumbnail([1, 2, 3], "image/png");
+
+        // Act
+        book.CoverThumbnail![0] = 9;
+
+        // Assert
+        Assert.Equal([1, 2, 3], book.CoverThumbnail);
+    }
+
+    [Fact]
+    public void ClearCoverImage_ExistingThumbnail_RemovesThumbnail()
+    {
+        // Arrange
+        var book = new Book(
+            Guid.Parse("22222222-2222-4222-8222-222222220001"),
+            "Go Like Hell",
+            "A. J. Baime");
+        book.SetCoverImage([1], "image/png");
+        book.SetCoverThumbnail([2], "image/png");
+
+        // Act
+        book.ClearCoverImageAndThumbnail();
+
+        // Assert
+        Assert.False(book.HasCoverThumbnail);
+        Assert.Null(book.CoverThumbnail);
+        Assert.Null(book.CoverThumbnailContentType);
+    }
+
+    [Fact]
     public void Constructor_EmptyId_ThrowsDomainValidationException()
     {
         // Act
@@ -204,7 +260,7 @@ public sealed class BookTests
         book.SetCoverImage([1], "image/png");
 
         // Act
-        book.ClearCoverImage();
+        book.ClearCoverImageAndThumbnail();
 
         // Assert
         Assert.False(book.HasCoverImage);

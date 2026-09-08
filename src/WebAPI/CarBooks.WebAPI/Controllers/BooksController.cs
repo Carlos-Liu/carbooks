@@ -29,6 +29,18 @@ public sealed class BooksController : ControllerBase
     public Task<CategoryBooksDto> GetBooksAsync(Guid categoryId, CancellationToken cancellationToken) =>
         bookAppService.GetBooksByCategoryIdAsync(categoryId, cancellationToken);
 
+    /// <summary>Returns the locally stored thumbnail for a book cover.</summary>
+    /// <param name="bookId">Book identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    [HttpGet("api/books/{bookId:guid}/cover/thumbnail")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetCoverThumbnailAsync(Guid bookId, CancellationToken cancellationToken)
+    {
+        var thumbnail = await bookAppService.GetCoverThumbnailAsync(bookId, cancellationToken);
+        return File(thumbnail.Content, thumbnail.ContentType ?? "application/octet-stream");
+    }
+
     /// <summary>
     /// Creates a book. Send <c>multipart/form-data</c> with text fields and an optional local
     /// cover image file.

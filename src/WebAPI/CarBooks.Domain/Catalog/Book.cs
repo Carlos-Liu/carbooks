@@ -16,6 +16,7 @@ namespace CarBooks.Domain.Catalog;
 public sealed class Book : Entity
 {
     private byte[]? coverImage;
+    private byte[]? coverThumbnail;
 
     public Book(
         Guid id,
@@ -80,8 +81,21 @@ public sealed class Book : Entity
     [MaxLength(Consts.MaxContentTypeLength)]
     public string? CoverImageContentType { get; private set; }
 
+    /// <summary>Locally stored thumbnail derived from <see cref="CoverImage"/>.</summary>
+    public byte[]? CoverThumbnail
+    {
+        get => coverThumbnail?.ToArray();
+        private set => coverThumbnail = value;
+    }
+
+    [MaxLength(Consts.MaxContentTypeLength)]
+    public string? CoverThumbnailContentType { get; private set; }
+
     public bool HasCoverImage =>
         coverImage is { Length: > 0 } && !string.IsNullOrWhiteSpace(CoverImageContentType);
+
+    public bool HasCoverThumbnail =>
+        coverThumbnail is { Length: > 0 } && !string.IsNullOrWhiteSpace(CoverThumbnailContentType);
 
     public void SetCoverImage(byte[]? content, string? contentType)
     {
@@ -104,10 +118,33 @@ public sealed class Book : Entity
         CoverImageContentType = Guard.Text(contentType, nameof(CoverImageContentType));
     }
 
-    public void ClearCoverImage()
+    public void SetCoverThumbnail(byte[]? content, string? contentType)
+    {
+        if (content == null || content.Length == 0)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(contentType))
+        {
+            throw new DomainValidationException("Cover thumbnail content type is required when a thumbnail is stored.");
+        }
+
+        CoverThumbnail = content.ToArray();
+        CoverThumbnailContentType = Guard.Text(contentType, nameof(CoverThumbnailContentType));
+    }
+
+    public void ClearCoverImageAndThumbnail()
     {
         CoverImage = null;
         CoverImageContentType = null;
+        ClearCoverThumbnail();
+    }
+
+    private void ClearCoverThumbnail()
+    {
+        CoverThumbnail = null;
+        CoverThumbnailContentType = null;
     }
 
     private static DateOnly? ValidatePublishedOn(DateOnly? publishedOn)

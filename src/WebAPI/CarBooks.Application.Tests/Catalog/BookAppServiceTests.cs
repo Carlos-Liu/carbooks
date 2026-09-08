@@ -4,6 +4,7 @@ using CarBooks.Domain.Catalog;
 using CarBooks.Domain.Repositories;
 using CarBooks.Domain.Shared;
 using CarBooks.Domain.Shared.Errors;
+using CarBooks.Domain.Shared.Media;
 using CarBooks.Infrastructure.Media;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -17,7 +18,7 @@ public sealed class BookAppServiceTests
     private readonly ITagRepository tagRepository = Substitute.For<ITagRepository>();
     private readonly IBookTagsRepository bookTagsRepository = Substitute.For<IBookTagsRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
-    private readonly IDataUriFactory dataUriFactory = Substitute.For<IDataUriFactory>();
+    private readonly ICoverThumbnailGenerator coverThumbnailGenerator = Substitute.For<ICoverThumbnailGenerator>();
     private readonly BookAppService bookAppService;
 
     public BookAppServiceTests()
@@ -30,14 +31,16 @@ public sealed class BookAppServiceTests
             bookTagsRepository,
             unitOfWork);
         var catalogManager = new CatalogManager(categoryRepository, bookRepository);
-        dataUriFactory.Create(Arg.Any<byte[]?>(), Arg.Any<string?>()).Returns((string?)null);
+        coverThumbnailGenerator.Generate(Arg.Any<byte[]>(), Arg.Any<string>())
+            .Returns(call => new ImageContent(call.ArgAt<byte[]>(0), call.ArgAt<string>(1)));
         bookTagsRepository.ListTagsByBookIdsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
             .Returns(new Dictionary<Guid, IReadOnlyList<Tag>>());
         bookAppService = new BookAppService(
             catalogManager,
             bookManager,
+            bookRepository,
             bookTagsRepository,
-            dataUriFactory,
+            coverThumbnailGenerator,
             NullLogger<BookAppService>.Instance);
     }
 
@@ -137,11 +140,12 @@ public sealed class BookAppServiceTests
     }
 
     [Fact]
-    public async Task CreateBookAsync_SupportedCoverImage_ReturnsCoverDataUri()
+    public async Task CreateBookAsync_SupportedCoverImage_ReturnsCoverThumbnailUrl()
     {
         // Arrange
         var bytes = new byte[] { 1, 2, 3, 4 };
-        dataUriFactory.Create(Arg.Any<byte[]?>(), "image/jpeg").Returns("data:image/jpeg;base64,AQIDBA==");
+        coverThumbnailGenerator.Generate(bytes, "image/jpeg")
+            .Returns(new ImageContent([9, 8], "image/jpeg"));
         var request = new CreateBookDto
         {
             Name = "Go Like Hell",
@@ -157,7 +161,7 @@ public sealed class BookAppServiceTests
         var result = await bookAppService.CreateBookAsync(request, coverImage, CancellationToken.None);
 
         // Assert
-        Assert.Equal("data:image/jpeg;base64,AQIDBA==", result.CoverImage);
+        Assert.Equal($"/api/books/{result.Id}/cover/thumbnail", result.CoverThumbnailUrl);
     }
 
     [Fact]
@@ -165,7 +169,8 @@ public sealed class BookAppServiceTests
     {
         // Arrange
         var bytes = new byte[] { 1, 2, 3, 4 };
-        dataUriFactory.Create(Arg.Any<byte[]?>(), "image/jpeg").Returns("data:image/jpeg;base64,AQIDBA==");
+        coverThumbnailGenerator.Generate(bytes, "image/jpeg")
+            .Returns(new ImageContent([9, 8], "image/jpeg"));
         var request = new CreateBookDto
         {
             Name = "Go Like Hell",
@@ -183,7 +188,7 @@ public sealed class BookAppServiceTests
 
         // Assert
         Assert.Equal("https://example.com/covers/go-like-hell.jpg", result.CoverUrl);
-        Assert.Equal("data:image/jpeg;base64,AQIDBA==", result.CoverImage);
+        Assert.Equal($"/api/books/{result.Id}/cover/thumbnail", result.CoverThumbnailUrl);
     }
 
     [Fact]
@@ -204,7 +209,7 @@ public sealed class BookAppServiceTests
         var result = await bookAppService.CreateBookAsync(request, coverImage, CancellationToken.None);
 
         // Assert
-        Assert.Null(result.CoverImage);
+        Assert.Null(result.CoverThumbnailUrl);
     }
 
     [Fact]
@@ -219,6 +224,7 @@ public sealed class BookAppServiceTests
             new(bookId, "First Book", "A. J. Baime"),
             new(Guid.Parse("22222222-2222-4222-8222-222222220002"), "Second Book", "John Smith"),
         };
+        books[0].SetCoverThumbnail([1, 2, 3], "image/jpeg");
         var racingTag = new Tag(Guid.Parse("33333333-3333-4333-8333-333333330001"), "Racing");
         categoryRepository.FindAsync(categoryId, Arg.Any<CancellationToken>()).Returns(category);
         bookRepository.ListByCategoryAsync(categoryId, Arg.Any<CancellationToken>()).Returns(books);
@@ -236,9 +242,42 @@ public sealed class BookAppServiceTests
         Assert.Equal(2, result.Category.BookCount);
         Assert.Equal(2, result.Books.Count);
         Assert.Equal("First Book", result.Books[0].Name);
+        Assert.Equal($"/api/books/{bookId}/cover/thumbnail", result.Books[0].CoverThumbnailUrl);
         Assert.Single(result.Books[0].Tags);
         Assert.Equal("Racing", result.Books[0].Tags[0].Name);
         Assert.Equal("Second Book", result.Books[1].Name);
+        Assert.Null(result.Books[1].CoverThumbnailUrl);
         Assert.Empty(result.Books[1].Tags);
+    }
+
+    [Fact]
+    public async Task GetCoverThumbnailAsync_ExistingThumbnail_ReturnsThumbnailPayload()
+    {
+        // Arrange
+        var bookId = Guid.Parse("22222222-2222-4222-8222-222222220001");
+        bookRepository.FindCoverThumbnailAsync(bookId, Arg.Any<CancellationToken>())
+            .Returns(new ImageContent([1, 2, 3], "image/jpeg"));
+
+        // Act
+        var result = await bookAppService.GetCoverThumbnailAsync(bookId, CancellationToken.None);
+
+        // Assert
+        Assert.Equal([1, 2, 3], result.Content);
+        Assert.Equal("image/jpeg", result.ContentType);
+    }
+
+    [Fact]
+    public async Task GetCoverThumbnailAsync_MissingThumbnail_ThrowsEntityNotFoundException()
+    {
+        // Arrange
+        var bookId = Guid.Parse("22222222-2222-4222-8222-222222220001");
+        bookRepository.FindCoverThumbnailAsync(bookId, Arg.Any<CancellationToken>())
+            .Returns((ImageContent?)null);
+
+        // Act
+        var act = () => bookAppService.GetCoverThumbnailAsync(bookId, CancellationToken.None);
+
+        // Assert
+        await Assert.ThrowsAsync<EntityNotFoundException>(act);
     }
 }

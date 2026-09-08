@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -25,7 +25,9 @@ namespace CarBooks.Database.Ef.Migrations
                     Isbn = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
                     CoverUrl = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
                     CoverImage = table.Column<byte[]>(type: "bytea", nullable: true),
-                    CoverImageContentType = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true)
+                    CoverImageContentType = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    CoverThumbnail = table.Column<byte[]>(type: "bytea", nullable: true),
+                    CoverThumbnailContentType = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true)
                 },
                 constraints: table =>
                 {
