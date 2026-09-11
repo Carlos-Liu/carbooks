@@ -8,6 +8,10 @@ internal sealed class CoverThumbnailGenerator : ICoverThumbnailGenerator
 {
     private const int ThumbnailWidth = 160;
     private const int ThumbnailQuality = 85;
+    private const string JpegContentType = "image/jpeg";
+    private const string PngContentType = "image/png";
+    private const string GifContentType = "image/gif";
+    private const string WebPContentType = "image/webp";
 
     /// <summary>
     /// Generates a thumbnail image from the provided content and content type.
@@ -27,7 +31,25 @@ internal sealed class CoverThumbnailGenerator : ICoverThumbnailGenerator
             throw new DomainValidationException("Cover image content is required to generate a thumbnail.");
         }
 
-        using var bitmap = SKBitmap.Decode(content);
+        var detectedContentType = DetectContentType(content);
+        if (detectedContentType is null)
+        {
+            throw new DomainValidationException("Cover image must be a JPEG, PNG, GIF or WebP file.");
+        }
+
+        if (!string.Equals(detectedContentType, contentType.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            throw new DomainValidationException($"Cover image content is {detectedContentType}, but its declared content type is {contentType}.");
+        }
+
+        using var data = SKData.CreateCopy(content);
+        using var codec = SKCodec.Create(data);
+        if (codec is null)
+        {
+            throw new DomainValidationException("Cover image must be a valid image file.");
+        }
+
+        using var bitmap = SKBitmap.Decode(codec);
         if (bitmap is null || bitmap.Width <= 0 || bitmap.Height <= 0)
         {
             throw new DomainValidationException("Cover image must be a valid image file.");
@@ -43,26 +65,69 @@ internal sealed class CoverThumbnailGenerator : ICoverThumbnailGenerator
         }
 
         using var image = SKImage.FromBitmap(resized);
-        using var encoded = image.Encode(GetEncodedImageFormat(contentType), ThumbnailQuality);
+        using var encoded = image.Encode(GetEncodedImageFormat(detectedContentType), ThumbnailQuality);
 
-        return new ImageContent(encoded.ToArray(), NormalizeOutputContentType(contentType));
+        return new ImageContent(encoded.ToArray(), NormalizeOutputContentType(detectedContentType));
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="content"></param>
+    /// <returns></returns>
+    private static string? DetectContentType(ReadOnlySpan<byte> content)
+    {
+        if (content.Length >= 3 &&
+            content[0] == 0xFF &&
+            content[1] == 0xD8 &&
+            content[2] == 0xFF)
+        {
+            return JpegContentType;
+        }
+
+        if (content.Length >= 8 &&
+            content[0] == 0x89 &&
+            content[1] == 0x50 &&
+            content[2] == 0x4E &&
+            content[3] == 0x47 &&
+            content[4] == 0x0D &&
+            content[5] == 0x0A &&
+            content[6] == 0x1A &&
+            content[7] == 0x0A)
+        {
+            return PngContentType;
+        }
+
+        if (content.StartsWith("GIF87a"u8) || content.StartsWith("GIF89a"u8))
+        {
+            return GifContentType;
+        }
+
+        if (content.Length >= 12 &&
+            content[..4].SequenceEqual("RIFF"u8) &&
+            content.Slice(8, 4).SequenceEqual("WEBP"u8))
+        {
+            return WebPContentType;
+        }
+
+        return null;
     }
 
     private static SKEncodedImageFormat GetEncodedImageFormat(string contentType) =>
         contentType.ToLowerInvariant() switch
         {
-            "image/png" => SKEncodedImageFormat.Png,
-            "image/gif" => SKEncodedImageFormat.Png,
-            "image/webp" => SKEncodedImageFormat.Webp,
+            PngContentType => SKEncodedImageFormat.Png,
+            GifContentType => SKEncodedImageFormat.Png,
+            WebPContentType => SKEncodedImageFormat.Webp,
             _ => SKEncodedImageFormat.Jpeg,
         };
 
     private static string NormalizeOutputContentType(string contentType) =>
         contentType.ToLowerInvariant() switch
         {
-            "image/png" => "image/png",
-            "image/gif" => "image/png",
-            "image/webp" => "image/webp",
-            _ => "image/jpeg",
+            PngContentType => PngContentType,
+            GifContentType => PngContentType,
+            WebPContentType => WebPContentType,
+            _ => JpegContentType,
         };
 }

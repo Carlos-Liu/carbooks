@@ -47,8 +47,8 @@ interface BookCardProps {
 export function BookCard({ book }: BookCardProps) {
   const styles = useStyles();
 
-  // Prefer the locally stored cover when the publisher host is unreachable.
-  const coverSource = book.coverImage ?? book.coverUrl ?? undefined;
+  // Prefer the locally stored thumbnail when the publisher host is unreachable.
+  const coverSource = book.coverThumbnailUrl ?? book.coverUrl ?? undefined;
   const tags = book.tags ?? [];
 
   return (

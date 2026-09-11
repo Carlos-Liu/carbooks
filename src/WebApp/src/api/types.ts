@@ -23,8 +23,8 @@ export interface Book {
   isbn?: string | null;
   /** Absolute URL of the publisher cover artwork. */
   coverUrl?: string | null;
-  /** Locally stored cover artwork as a `data:` URI, absent when only the URL is known. */
-  coverImage?: string | null;
+  /** Relative URL of the locally stored cover thumbnail, absent when no image was uploaded. */
+  coverThumbnailUrl?: string | null;
   /** Tags assigned to the book. */
   tags: Tag[];
 }

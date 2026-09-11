@@ -244,10 +244,10 @@ export function AddBookPage() {
           />
         </Field>
 
-        <Field label="Cover image" hint="Optional. JPEG, PNG, GIF, WebP or SVG, up to 5 MB.">
+        <Field label="Cover image" hint="Optional. JPEG, PNG, GIF or WebP, up to 5 MB.">
           <input
             type="file"
-            accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
+            accept="image/jpeg,image/png,image/gif,image/webp"
             onChange={(event) => onCoverImageChange(event.target.files)}
           />
         </Field>
