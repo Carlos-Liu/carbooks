@@ -5,6 +5,7 @@ import { AddBookPage } from './pages/AddBookPage';
 import { CategoryBooksPage } from './pages/CategoryBooksPage';
 import { HomePage } from './pages/HomePage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { TagBooksPage } from './pages/TagBooksPage';
 import { TagsPage } from './pages/TagsPage';
 
 const useStyles = makeStyles({
@@ -41,6 +42,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/tags" element={<TagsPage />} />
+          <Route path="/tags/:tagId" element={<TagBooksPage />} />
           <Route path="/books/new" element={<AddBookPage />} />
           <Route path="/categories/:categoryId" element={<CategoryBooksPage />} />
           <Route path="*" element={<NotFoundPage />} />

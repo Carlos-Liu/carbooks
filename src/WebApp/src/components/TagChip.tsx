@@ -1,4 +1,5 @@
 import { makeStyles, tokens } from '@fluentui/react-components';
+import { useHref, useNavigate } from 'react-router';
 
 const tagAccentBorders = [
   '#c45c8a',
@@ -18,6 +19,9 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
     fontSize: tokens.fontSizeBase300,
     lineHeight: tokens.lineHeightBase300,
+    color: 'inherit',
+    textDecorationLine: 'none',
+    cursor: 'pointer',
   },
 });
 
@@ -34,13 +38,31 @@ interface TagChipProps {
   name: string;
 }
 
-/** Read-only tag chip used on the tags listing page. */
+/** Clickable tag chip that navigates to the books labeled with this tag. */
 export function TagChip({ id, name }: TagChipProps) {
   const styles = useStyles();
+  const to = `/tags/${encodeURIComponent(id)}`;
+  const href = useHref(to);
+  const navigate = useNavigate();
 
   return (
-    <span className={styles.chip} style={{ border: `1px solid ${accentForTagId(id)}` }}>
+    <a
+      className={styles.chip}
+      href={href}
+      style={{ border: `1px solid ${accentForTagId(id)}` }}
+      onClick={(event) => {
+        const isModifiedClick =
+          event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
+
+        if (event.defaultPrevented || isModifiedClick) {
+          return;
+        }
+
+        event.preventDefault();
+        void navigate(to);
+      }}
+    >
       {name}
-    </span>
+    </a>
   );
 }
