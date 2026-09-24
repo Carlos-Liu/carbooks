@@ -7,12 +7,13 @@ namespace CarBooks.Domain.Tests.Catalog;
 public sealed class CatalogManagerTests
 {
     private readonly ICategoryRepository categoryRepository = Substitute.For<ICategoryRepository>();
+    private readonly ITagRepository tagRepository = Substitute.For<ITagRepository>();
     private readonly IBookRepository bookRepository = Substitute.For<IBookRepository>();
     private readonly CatalogManager catalogManager;
 
     public CatalogManagerTests()
     {
-        catalogManager = new CatalogManager(categoryRepository, bookRepository);
+        catalogManager = new CatalogManager(categoryRepository, tagRepository, bookRepository);
     }
 
     [Fact]
@@ -45,6 +46,41 @@ public sealed class CatalogManagerTests
 
         // Act
         var act = () => catalogManager.GetCategoryBooksAsync(categoryId, CancellationToken.None);
+
+        // Assert
+        await Assert.ThrowsAsync<EntityNotFoundException>(act);
+    }
+
+    [Fact]
+    public async Task GetTagBooksAsync_ExistingTag_ReturnsTagAndBooks()
+    {
+        // Arrange
+        var tagId = Guid.Parse("33333333-3333-4333-8333-333333330001");
+        var tag = new Tag(tagId, "Racing");
+        var books = new List<Book>
+        {
+            new(Guid.Parse("22222222-2222-4222-8222-222222220001"), "Go Like Hell", "A. J. Baime"),
+        };
+        tagRepository.FindAsync(tagId, Arg.Any<CancellationToken>()).Returns(tag);
+        bookRepository.ListByTagAsync(tagId, Arg.Any<CancellationToken>()).Returns(books);
+
+        // Act
+        var result = await catalogManager.GetTagBooksAsync(tagId, CancellationToken.None);
+
+        // Assert
+        Assert.Same(tag, result.Tag);
+        Assert.Same(books, result.Books);
+    }
+
+    [Fact]
+    public async Task GetTagBooksAsync_MissingTag_ThrowsEntityNotFoundException()
+    {
+        // Arrange
+        var tagId = Guid.Parse("33333333-3333-4333-8333-333333330099");
+        tagRepository.FindAsync(tagId, Arg.Any<CancellationToken>()).Returns((Tag?)null);
+
+        // Act
+        var act = () => catalogManager.GetTagBooksAsync(tagId, CancellationToken.None);
 
         // Assert
         await Assert.ThrowsAsync<EntityNotFoundException>(act);

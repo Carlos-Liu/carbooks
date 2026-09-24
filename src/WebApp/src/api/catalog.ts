@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 
 import { getJson, postForm } from './client';
-import type { Book, Category, CategoryBooks, Tag } from './types';
+import type { Book, Category, CategoryBooks, Tag, TagBooks } from './types';
 
 export const categoriesQuery = () =>
   queryOptions({
@@ -20,6 +20,13 @@ export const categoryBooksQuery = (categoryId: string) =>
     queryKey: ['categories', categoryId, 'books'] as const,
     queryFn: ({ signal }) =>
       getJson<CategoryBooks>(`/categories/${encodeURIComponent(categoryId)}/books`, signal),
+  });
+
+export const tagBooksQuery = (tagId: string) =>
+  queryOptions({
+    queryKey: ['tags', tagId, 'books'] as const,
+    queryFn: ({ signal }) =>
+      getJson<TagBooks>(`/tags/${encodeURIComponent(tagId)}/books`, signal),
   });
 
 export interface CreateBookInput {

@@ -62,6 +62,25 @@ internal sealed class BookAppService : IBookAppService
             result.Books.ToDtos(CreateCoverThumbnailUrl, tagsByBookId));
     }
 
+    public async Task<TagBooksDto> GetBooksByTagIdAsync(
+        Guid tagId,
+        CancellationToken cancellationToken)
+    {
+        var result = await catalogManager.GetTagBooksAsync(tagId, cancellationToken);
+        var tagsByBookId = await bookTagsRepository.ListTagsByBookIdsAsync(
+            result.Books.Select(book => book.Id),
+            cancellationToken);
+
+        logger.LogInformation(
+            "Returning {BookCount} books for tag {TagId}.",
+            result.Books.Count,
+            result.Tag.Id);
+
+        return new TagBooksDto(
+            result.Tag.ToDto(),
+            result.Books.ToDtos(CreateCoverThumbnailUrl, tagsByBookId));
+    }
+
     public async Task<BookDto> CreateBookAsync(
         CreateBookDto request,
         CoverImageDto? coverImage,

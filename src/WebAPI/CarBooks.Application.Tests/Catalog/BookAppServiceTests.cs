@@ -30,7 +30,7 @@ public sealed class BookAppServiceTests
             tagRepository,
             bookTagsRepository,
             unitOfWork);
-        var catalogManager = new CatalogManager(categoryRepository, bookRepository);
+        var catalogManager = new CatalogManager(categoryRepository, tagRepository, bookRepository);
         coverThumbnailGenerator.Generate(Arg.Any<byte[]>(), Arg.Any<string>())
             .Returns(call => new ImageContent(call.ArgAt<byte[]>(0), call.ArgAt<string>(1)));
         bookTagsRepository.ListTagsByBookIdsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
@@ -248,6 +248,57 @@ public sealed class BookAppServiceTests
         Assert.Equal("Second Book", result.Books[1].Name);
         Assert.Null(result.Books[1].CoverThumbnailUrl);
         Assert.Empty(result.Books[1].Tags);
+    }
+
+    [Fact]
+    public async Task GetBooksByTagIdAsync_ExistingTag_ReturnsMappedTagAndBooks()
+    {
+        // Arrange
+        var tagId = Guid.Parse("33333333-3333-4333-8333-333333330001");
+        var bookId = Guid.Parse("22222222-2222-4222-8222-222222220001");
+        var tag = new Tag(tagId, "Racing");
+        var books = new List<Book>
+        {
+            new(bookId, "First Book", "A. J. Baime"),
+            new(Guid.Parse("22222222-2222-4222-8222-222222220002"), "Second Book", "John Smith"),
+        };
+        books[0].SetCoverThumbnail([1, 2, 3], "image/jpeg");
+        tagRepository.FindAsync(tagId, Arg.Any<CancellationToken>()).Returns(tag);
+        bookRepository.ListByTagAsync(tagId, Arg.Any<CancellationToken>()).Returns(books);
+        bookTagsRepository.ListTagsByBookIdsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+            .Returns(new Dictionary<Guid, IReadOnlyList<Tag>>
+            {
+                [bookId] = [tag],
+            });
+
+        // Act
+        var result = await bookAppService.GetBooksByTagIdAsync(tagId, CancellationToken.None);
+
+        // Assert
+        Assert.Equal(tagId, result.Tag.Id);
+        Assert.Equal("Racing", result.Tag.Name);
+        Assert.Equal(2, result.Books.Count);
+        Assert.Equal("First Book", result.Books[0].Name);
+        Assert.Equal($"/api/books/{bookId}/cover/thumbnail", result.Books[0].CoverThumbnailUrl);
+        Assert.Single(result.Books[0].Tags);
+        Assert.Equal("Racing", result.Books[0].Tags[0].Name);
+        Assert.Equal("Second Book", result.Books[1].Name);
+        Assert.Null(result.Books[1].CoverThumbnailUrl);
+        Assert.Empty(result.Books[1].Tags);
+    }
+
+    [Fact]
+    public async Task GetBooksByTagIdAsync_MissingTag_ThrowsEntityNotFoundException()
+    {
+        // Arrange
+        var tagId = Guid.Parse("33333333-3333-4333-8333-333333330099");
+        tagRepository.FindAsync(tagId, Arg.Any<CancellationToken>()).Returns((Tag?)null);
+
+        // Act
+        var act = () => bookAppService.GetBooksByTagIdAsync(tagId, CancellationToken.None);
+
+        // Assert
+        await Assert.ThrowsAsync<EntityNotFoundException>(act);
     }
 
     [Fact]

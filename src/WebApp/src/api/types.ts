@@ -33,3 +33,8 @@ export interface CategoryBooks {
   category: Category;
   books: Book[];
 }
+
+export interface TagBooks {
+  tag: Tag;
+  books: Book[];
+}

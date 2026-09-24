@@ -8,12 +8,13 @@ namespace CarBooks.Application.Tests.Catalog;
 public sealed class CategoryAppServiceTests
 {
     private readonly ICategoryRepository categoryRepository = Substitute.For<ICategoryRepository>();
+    private readonly ITagRepository tagRepository = Substitute.For<ITagRepository>();
     private readonly IBookRepository bookRepository = Substitute.For<IBookRepository>();
     private readonly CategoryAppService categoryAppService;
 
     public CategoryAppServiceTests()
     {
-        var catalogManager = new CatalogManager(categoryRepository, bookRepository);
+        var catalogManager = new CatalogManager(categoryRepository, tagRepository, bookRepository);
         categoryAppService = new CategoryAppService(catalogManager, NullLogger<CategoryAppService>.Instance);
     }
 

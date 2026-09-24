@@ -29,6 +29,15 @@ public sealed class BooksController : ControllerBase
     public Task<CategoryBooksDto> GetBooksAsync(Guid categoryId, CancellationToken cancellationToken) =>
         bookAppService.GetBooksByCategoryIdAsync(categoryId, cancellationToken);
 
+    /// <summary>Returns a tag together with the books labeled by it.</summary>
+    /// <param name="tagId">Tag identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    [HttpGet("api/tags/{tagId:guid}/books")]
+    [ProducesResponseType(typeof(TagBooksDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public Task<TagBooksDto> GetBooksByTagAsync(Guid tagId, CancellationToken cancellationToken) =>
+        bookAppService.GetBooksByTagIdAsync(tagId, cancellationToken);
+
     /// <summary>Returns the locally stored thumbnail for a book cover.</summary>
     /// <param name="bookId">Book identifier.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
